@@ -37,10 +37,17 @@ export default {
           '开发在本地手动加了一个字段，上线时忘了在生产执行。' +
           '接口报错，排查两小时才发现是 schema 不一致。',
       },
+      {
+        type: 'p',
+        text:
+          '更糟的是，有人记得执行过，但不知道执行的是哪个版本，' +
+          '只能挨个表对比结构。',
+      },
 
       { type: 'h2', text: '二、迁移工具做什么' },
       {
-        type: 'table', head: ['能力', '作用'],
+        type: 'table',
+        head: ['能力', '作用'],
         rows: [
           ['版本记录', '知道执行到哪'],
           ['顺序执行', '避免漏跑/乱跑'],
@@ -51,7 +58,8 @@ export default {
 
       { type: 'h2', text: '三、一条迁移的原则' },
       {
-        type: 'list', items: [
+        type: 'list',
+        items: [
           '一次只做一件事',
           '先加字段，再写数据，最后加约束',
           '大表变更拆成多步',
@@ -67,30 +75,50 @@ export default {
           '常见顺序是「先迁移、后发代码」；删除字段则反过来，' +
           '先停用代码、再删字段，避免旧代码访问不存在的列。',
       },
+      {
+        type: 'table',
+        head: ['变更', '顺序'],
+        rows: [
+          ['加字段', '迁移 → 发代码'],
+          ['删字段', '停代码 → 删字段'],
+          ['改类型', '新列双写 → 迁移 → 切读 → 删旧列'],
+        ],
+      },
 
       { type: 'h2', text: '五、常见失败' },
       {
-        type: 'table', head: ['错误', '后果'],
+        type: 'table',
+        head: ['错误', '后果'],
         rows: [
           ['手动改生产', '无法追踪'],
           ['迁移不可重复', '重跑报错'],
           ['大表直接加索引', '锁表'],
           ['删除字段太早', '旧代码崩溃'],
+          ['没有回滚脚本', '失败只能恢复备份'],
         ],
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '六、边界' },
       {
-        type: 'checklist', items: [
+        type: 'callout',
+        kind: 'warn',
+        text: '迁移工具只保证「结构版本一致」，不保证数据正确；数据修复要单独脚本与对账。',
+      },
+
+      { type: 'h2', text: '七、验收' },
+      {
+        type: 'checklist',
+        items: [
           { k: '迁移有版本记录', v: '看版本表' },
           { k: '脚本可重复执行', v: '重跑' },
           { k: '有回滚方案', v: '看脚本' },
           { k: '预发执行过', v: '看记录' },
           { k: '部署顺序明确', v: '看流程' },
+          { k: '迁移有负责人', v: '看记录' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -101,13 +129,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '迁移不是「执行 SQL」，是数据库的结构版本控制。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -159,20 +188,27 @@ export default {
           '业务低峰给订单表加索引，以为很快。' +
           '结果 DDL 持有元数据锁，后续查询排队，十分钟后全站超时。',
       },
+      {
+        type: 'chain',
+        kind: 'danger',
+        items: ['长事务持有元数据锁', 'DDL 等待', '后续查询排队', { text: '全站超时', mark: true }],
+      },
 
       { type: 'h2', text: '二、不同数据库的能力' },
       {
-        type: 'table', head: ['数据库', '在线 DDL'],
+        type: 'table',
+        head: ['数据库', '在线 DDL'],
         rows: [
           ['MySQL 8', '部分操作支持 online/inplace'],
-          ['PostgreSQL', '多数加索引可并发建'],
+          ['PostgreSQL', '加索引可 CONCURRENTLY'],
           ['SQL Server', '企业版支持在线索引'],
         ],
       },
 
       { type: 'h2', text: '三、常见做法' },
       {
-        type: 'list', items: [
+        type: 'list',
+        items: [
           '加索引用 CONCURRENTLY / ONLINE',
           '大表变更用 gh-ost / pt-online-schema-change',
           '先加可空列，再回填，再加约束',
@@ -190,27 +226,38 @@ export default {
 
       { type: 'h2', text: '五、常见失败' },
       {
-        type: 'table', head: ['错误', '后果'],
+        type: 'table',
+        head: ['错误', '后果'],
         rows: [
           ['高峰期直接 DDL', '锁表/超时'],
           ['不查长事务', 'DDL 排队'],
           ['影子表不限流', 'IO 打满'],
           ['切换无回滚', '失败难恢复'],
+          ['在线 DDL 当零影响', '仍可能短暂锁'],
         ],
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '六、边界' },
       {
-        type: 'checklist', items: [
+        type: 'callout',
+        kind: 'warn',
+        text: '在线 DDL 不等于零影响。复制、切换、重建表仍会占 IO 和空间，要留余量。',
+      },
+
+      { type: 'h2', text: '七、验收' },
+      {
+        type: 'checklist',
+        items: [
           { k: 'DDL 走在线工具', v: '看执行方式' },
           { k: '执行前查长事务', v: '看监控' },
           { k: '有速度限制', v: '看参数' },
           { k: '切换有回滚', v: '演练' },
           { k: '低峰执行', v: '看排期' },
+          { k: '磁盘空间充足', v: '看容量' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -221,13 +268,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '在线 DDL 的核心是「不阻塞、可回滚、能限流」。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -297,6 +345,7 @@ export default {
           '批间 sleep，控制 QPS',
           '走索引，避免全表扫描',
           '记录进度，可断点续跑',
+          '在从库回填，减轻主库压力',
         ],
       },
 
@@ -307,30 +356,50 @@ export default {
           '双写可能一边成功一边失败。要有补偿/对账，' +
           '不能假设两个写一定同时成功。',
       },
+      {
+        type: 'table',
+        head: ['场景', '处理'],
+        rows: [
+          ['新写失败', '重试/补偿'],
+          ['旧写失败', '回滚或告警'],
+          ['两边不一致', '对账修复'],
+          ['切换后旧写残留', '只读旧表并校验'],
+        ],
+      },
 
       { type: 'h2', text: '五、常见失败' },
       {
-        type: 'table', head: ['错误', '后果'],
+        type: 'table',
+        head: ['错误', '后果'],
         rows: [
           ['一次性回填', '锁表/IO 高'],
           ['只回填不双写', '新数据缺失'],
           ['双写无补偿', '数据不一致'],
           ['未对账就切换', '读到脏数据'],
+          ['回填无进度', '失败重来'],
         ],
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '六、边界' },
       {
-        type: 'checklist', items: [
+        type: 'callout', kind: 'info',
+        text: '回填适合「可分批、可按主键扫描」的数据；没有稳定排序键时，先设计分片键再回填。',
+      },
+
+      { type: 'h2', text: '七、验收' },
+      {
+        type: 'checklist',
+        items: [
           { k: '回填分批且可续跑', v: '看脚本' },
           { k: '双写有失败补偿', v: '看实现' },
           { k: '有对账任务', v: '看报表' },
           { k: '切换可回滚', v: '演练' },
           { k: '回填不影响线上', v: '看监控' },
+          { k: '进度可观测', v: '看表' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -341,13 +410,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '大表改造 = 新结构 + 双写 + 分批回填 + 对账切换，四步都不能省。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -402,7 +472,8 @@ export default {
 
       { type: 'h2', text: '二、备份策略' },
       {
-        type: 'table', head: ['策略', 'RPO', '成本'],
+        type: 'table',
+        head: ['策略', 'RPO', '成本'],
         rows: [
           ['每日全量', '最多丢一天', '高'],
           ['全量 + 增量', '分钟级', '中'],
@@ -412,37 +483,51 @@ export default {
 
       { type: 'h2', text: '三、恢复要演练什么' },
       {
-        type: 'list', items: [
-          '恢复到新实例，不覆盖生产',
-          '记录恢复耗时',
-          '验证数据行数与关键业务',
-          '验证应用能连上',
+        type: 'steps', items: [
+          { t: '恢复到新实例', d: '不覆盖生产' },
+          { t: '记录耗时', d: '对比 RTO' },
+          { t: '校验数据', d: '行数与关键业务' },
+          { t: '应用连通', d: '改配置验证' },
         ],
       },
 
-      { type: 'h2', text: '四、常见失败' },
+      { type: 'h2', text: '四、备份放哪' },
       {
-        type: 'table', head: ['错误', '后果'],
+        type: 'list', items: [
+          '本地备份 + 异地备份',
+          '对象存储开启版本与生命周期',
+          '备份文件加密',
+          '定期校验可读性',
+        ],
+      },
+
+      { type: 'h2', text: '五、常见失败' },
+      {
+        type: 'table',
+        head: ['错误', '后果'],
         rows: [
           ['只备份不恢复', '真出事恢复不了'],
           ['备份在同机房', '机房故障全丢'],
           ['没备份日志', '无法 PITR'],
           ['恢复未验证', '数据不完整'],
+          ['备份无监控', '失败无人知'],
         ],
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '六、验收' },
       {
-        type: 'checklist', items: [
+        type: 'checklist',
+        items: [
           { k: '有明确 RPO/RTO', v: '看文档' },
           { k: '备份异地保存', v: '看存储' },
           { k: '定期恢复演练', v: '看记录' },
           { k: '恢复后数据校验', v: '对账' },
           { k: '恢复耗时达标', v: '计时' },
+          { k: '备份失败有告警', v: '看监控' },
         ],
       },
 
-      { type: 'h2', text: '六、动手验证' },
+      { type: 'h2', text: '七、动手验证' },
       {
         type: 'list',
         items: [
@@ -453,13 +538,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '七、本课小结' },
+      { type: 'h2', text: '八、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '备份的价值在恢复。没演练过的备份，不能算备份。',
       },
 
-      { type: 'h2', text: '八、延伸问题' },
+      { type: 'h2', text: '九、延伸问题' },
       {
         type: 'list',
         items: [
@@ -514,7 +600,8 @@ export default {
 
       { type: 'h2', text: '二、复制模式' },
       {
-        type: 'table', head: ['模式', '特点', '风险'],
+        type: 'table',
+        head: ['模式', '特点', '风险'],
         rows: [
           ['异步', '主库不等从库', '可能丢数据'],
           ['半同步', '至少一个从库确认', '延迟略高'],
@@ -545,22 +632,37 @@ export default {
 
       { type: 'h2', text: '五、常见失败' },
       {
-        type: 'callout', kind: 'warn',
-        text: '把读流量全切从库，却不监控延迟，是读写分离最常见的事故来源。',
+        type: 'table',
+        head: ['错误', '后果'],
+        rows: [
+          ['读流量全切从库', '读到旧数据'],
+          ['不监控延迟', '故障不可见'],
+          ['延迟高仍读从库', '体验崩'],
+          ['切换无演练', '主库故障停摆'],
+        ],
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '六、边界' },
       {
-        type: 'checklist', items: [
+        type: 'callout',
+        kind: 'warn',
+        text: '读写分离的前提是「业务能接受延迟」。强一致读必须回主库，不能靠从库补。',
+      },
+
+      { type: 'h2', text: '七、验收' },
+      {
+        type: 'checklist',
+        items: [
           { k: '复制延迟有监控', v: '看指标' },
           { k: '关键读走主库', v: '看路由' },
           { k: '延迟超阈值有降级', v: '看策略' },
           { k: '故障切换演练过', v: '看记录' },
           { k: '从库数量可扩展', v: '看拓扑' },
+          { k: '切换后应用能恢复', v: '演练' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -571,13 +673,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '读写分离的前提是「接受延迟」，关键读必须能回到主库。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -667,21 +770,31 @@ export default {
           ['连接泄漏', '池越来越小'],
           ['空闲连接不回收', '资源浪费'],
           ['无获取超时', '请求堆积'],
+          ['扩容不同步调池', '新实例抢不到连接'],
         ],
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '六、边界' },
       {
-        type: 'checklist', items: [
+        type: 'callout',
+        kind: 'info',
+        text: '连接池不是越大越好；数据库 CPU 核数、磁盘 IO 和内存，才是并发的真实上限。',
+      },
+
+      { type: 'h2', text: '七、验收' },
+      {
+        type: 'checklist',
+        items: [
           { k: '总连接不超数据库上限', v: '算一遍' },
           { k: '有获取连接超时', v: '看配置' },
           { k: '连接泄漏有监控', v: '看指标' },
           { k: '空闲连接会回收', v: '看配置' },
           { k: '扩容时同步调连接', v: '看流程' },
+          { k: '连接等待可观测', v: '看指标' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -692,13 +805,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '连接数要按「数据库总预算 ÷ 实例数」分配，不是每个实例拍脑袋。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -791,10 +905,18 @@ export default {
           ['告警太多', '没人看'],
           ['慢日志阈值太高', '漏掉小慢查询'],
           ['没有历史基线', '不知道是否异常'],
+          ['只看平均延迟', '漏掉长尾'],
         ],
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '六、边界' },
+      {
+        type: 'callout',
+        kind: 'info',
+        text: '监控指标要结合业务基线看；同一个 QPS，在白天和凌晨的含义不同。',
+      },
+
+      { type: 'h2', text: '七、验收' },
       {
         type: 'checklist', items: [
           { k: '核心指标有看板', v: '看监控' },
@@ -802,10 +924,11 @@ export default {
           { k: '慢日志按指纹聚合', v: '看报表' },
           { k: '有历史基线', v: '看趋势' },
           { k: '告警能定位到实例', v: '看通知' },
+          { k: '长尾延迟有监控', v: '看 P99' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -816,13 +939,13 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
         type: 'callout', kind: 'info',
         text: '数据库监控看四件事：连接、缓存、复制、慢查询。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -912,22 +1035,35 @@ export default {
 
       { type: 'h2', text: '五、常见失败' },
       {
+        type: 'table', head: ['错误', '后果'],
+        rows: [
+          ['直接重启数据库', '中断恢复，问题复现'],
+          ['乱杀会话', '可能杀掉关键事务'],
+          ['只看应用日志', '漏掉数据库等待'],
+          ['不保留现场', '无法复盘'],
+        ],
+      },
+
+      { type: 'h2', text: '六、边界' },
+      {
         type: 'callout', kind: 'danger',
         text: '故障时直接 kill 会话或重启数据库，可能让问题更糟；先定位阻塞源，再决定杀谁。',
       },
 
-      { type: 'h2', text: '六、验收' },
+      { type: 'h2', text: '七、验收' },
       {
-        type: 'checklist', items: [
+        type: 'checklist',
+        items: [
           { k: '有排查手册', v: '看文档' },
           { k: '能快速看连接/锁/复制', v: '演练' },
           { k: '有长事务告警', v: '看监控' },
           { k: '有磁盘告警', v: '看监控' },
           { k: '故障后能复盘', v: '看记录' },
+          { k: '保留现场数据', v: '看流程' },
         ],
       },
 
-      { type: 'h2', text: '七、动手验证' },
+      { type: 'h2', text: '八、动手验证' },
       {
         type: 'list',
         items: [
@@ -938,13 +1074,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结' },
+      { type: 'h2', text: '九、本课小结' },
       {
-        type: 'callout', kind: 'info',
+        type: 'callout',
+        kind: 'info',
         text: '数据库排查先看资源与等待，再看 SQL；不要一上来就改参数。',
       },
 
-      { type: 'h2', text: '九、延伸问题' },
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
@@ -1052,6 +1189,7 @@ export default {
           { k: '低成本方案已试过', v: '看记录' },
           { k: '分片键选择有依据', v: '看设计' },
           { k: '扩容方案明确', v: '看文档' },
+          { k: '跨片查询可接受', v: '看业务' },
         ],
       },
 

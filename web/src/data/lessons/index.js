@@ -35,6 +35,7 @@ import h7 from './h7'
 import h8 from './h8'
 import h9 from './h9'
 import h10 from './h10'
+import h11 from './h11'
 import h13 from './h13'
 import h15 from './h15'
 import r1 from './r1'
@@ -98,6 +99,7 @@ export const lessons = {
   ...h8,
   ...h9,
   ...h10,
+  ...h11,
   ...h13,
   ...h15,
   ...r1,

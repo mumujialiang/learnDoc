@@ -16,6 +16,9 @@ export default defineConfig(({ command, isPreview }) => ({
     host: true,
     // 自动打开时直接用 IPv4 地址，避免 localhost 解析问题
     open: 'http://127.0.0.1:5173',
+    // 关闭 HMR：改代码后浏览器不再自动刷新，需要手动刷新查看变化。
+    // 想恢复热更新，把 false 改成 true 或删掉这一行。
+    hmr: false,
   },
   preview: {
     port: 4173,
