@@ -1,7 +1,16 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { chapters, readyLessons } from './data/course'
+
+import { readyLessons } from './data/course'
+import {
+  courses,
+  courseById,
+  courseChapters,
+  courseLessons,
+  courseOfLesson,
+  coursePath,
+} from './data/courses'
 
 const route = useRoute()
 
@@ -9,6 +18,21 @@ const theme = ref(localStorage.getItem('lm-theme') || 'light')
 const visited = ref(JSON.parse(localStorage.getItem('lm-visited') || '[]'))
 const progress = ref(0)
 const menuOpen = ref(false)
+
+const currentCourse = computed(() => {
+  if (route.name === 'course') return courseById[route.params.courseId] || null
+  if (route.name === 'lesson') {
+    return courseOfLesson(String(route.params.code || '').toUpperCase())
+  }
+  return null
+})
+
+const navChapters = computed(() =>
+  currentCourse.value ? courseChapters(currentCourse.value) : []
+)
+const progressLessons = computed(() =>
+  currentCourse.value ? courseLessons(currentCourse.value) : readyLessons
+)
 
 watch(
   theme,
@@ -20,11 +44,14 @@ watch(
 )
 
 watch(
-  () => route.path,
-  (p) => {
-    if (p.startsWith('/m') && !visited.value.includes(p)) {
-      visited.value = [...visited.value, p]
-      localStorage.setItem('lm-visited', JSON.stringify(visited.value))
+  () => route.fullPath,
+  () => {
+    if (route.name === 'lesson') {
+      const p = route.path
+      if (!visited.value.includes(p)) {
+        visited.value = [...visited.value, p]
+        localStorage.setItem('lm-visited', JSON.stringify(visited.value))
+      }
     }
     menuOpen.value = false
     window.scrollTo(0, 0)
@@ -42,10 +69,12 @@ onMounted(() => window.addEventListener('scroll', updateProgress, { passive: tru
 onUnmounted(() => window.removeEventListener('scroll', updateProgress))
 
 const doneCount = computed(
-  () => readyLessons.filter((l) => visited.value.includes(l.path)).length
+  () => progressLessons.value.filter((l) => visited.value.includes(l.path)).length
 )
 const donePercent = computed(() =>
-  readyLessons.length ? Math.round((doneCount.value / readyLessons.length) * 100) : 0
+  progressLessons.value.length
+    ? Math.round((doneCount.value / progressLessons.value.length) * 100)
+    : 0
 )
 
 const RING_R = 11
@@ -62,7 +91,7 @@ function isDone(path) {
 <template>
   <div class="mobile-bar">
     <button @click="menuOpen = !menuOpen" aria-label="菜单">☰</button>
-    <span style="font-size: 13px; font-weight: 600">商城 / ERP 后端课</span>
+    <span style="font-size: 13px; font-weight: 600">全栈工程课</span>
     <button
       style="margin-left: auto"
       @click="theme = theme === 'light' ? 'dark' : 'light'"
@@ -78,36 +107,66 @@ function isDone(path) {
     <aside class="sidebar" :class="{ open: menuOpen }">
       <div class="sidebar-head">
         <router-link to="/" class="brand">
-          <span class="brand-mark">ML</span>
+          <span class="brand-mark">L</span>
           <span class="brand-text">
-            <strong>MiniMall 工程课</strong>
-            <span>商城 + ERP 可视化讲义</span>
+            <strong>全栈工程课</strong>
+            <span>后端 · 数据库 · 前端 · AI</span>
           </span>
         </router-link>
       </div>
 
       <nav class="sidebar-scroll">
-        <div v-for="ch in chapters" :key="ch.id" class="chapter">
-          <div class="chapter-label">
-            {{ ch.id }} · {{ ch.label }}
-            <span v-if="ch.star" class="badge-mini">核心</span>
-          </div>
-          <router-link
-            v-for="l in ch.lessons"
-            :key="l.code"
-            :to="l.path || route.path"
-            class="nav-item"
-            :class="{
-              active: isActive(l.path),
-              disabled: l.status !== 'ready',
-              done: isDone(l.path),
-            }"
-          >
+        <template v-if="currentCourse">
+          <router-link to="/" class="nav-item course-back">
             <span class="nav-dot" />
-            <span>{{ l.title }}</span>
-            <span class="nav-code">{{ l.code }}</span>
+            <span>← 全部课程</span>
           </router-link>
-        </div>
+
+          <div class="chapter-label course-title">{{ currentCourse.name }}</div>
+
+          <div v-for="ch in navChapters" :key="ch.id" class="chapter">
+            <div class="chapter-label">
+              {{ ch.id }} · {{ ch.label }}
+              <span v-if="ch.star" class="badge-mini">核心</span>
+            </div>
+            <router-link
+              v-for="l in ch.lessons"
+              :key="l.code"
+              :to="l.path || route.path"
+              class="nav-item"
+              :class="{
+                active: isActive(l.path),
+                disabled: l.status !== 'ready',
+                done: isDone(l.path),
+              }"
+            >
+              <span class="nav-dot" />
+              <span>{{ l.title }}</span>
+              <span class="nav-code">{{ l.code }}</span>
+            </router-link>
+          </div>
+
+          <div v-if="!navChapters.length" class="course-empty">课程筹备中</div>
+        </template>
+
+        <template v-else>
+          <div class="chapter">
+            <div class="chapter-label">课程</div>
+            <router-link
+              v-for="c in courses"
+              :key="c.id"
+              :to="coursePath(c)"
+              class="nav-item"
+              :class="{ active: route.path === coursePath(c) }"
+            >
+              <span class="nav-dot" />
+              <span>{{ c.name }}</span>
+              <span class="nav-code">
+                {{ c.status === 'coming' ? '待开' : `${c.chapterIds.length}M` }}
+              </span>
+            </router-link>
+          </div>
+        </template>
 
         <div class="nav-divider" />
 
@@ -140,9 +199,14 @@ function isDone(path) {
             />
           </svg>
           <span>
-            已学 {{ doneCount }} / {{ readyLessons.length }}
-            <br />
-            <span style="font-size: 10px">完成度 {{ donePercent }}%</span>
+            <template v-if="progressLessons.length">
+              已学 {{ doneCount }} / {{ progressLessons.length }}
+              <br />
+              <span style="font-size: 10px">
+                {{ currentCourse ? currentCourse.name : '全部课程' }} · {{ donePercent }}%
+              </span>
+            </template>
+            <template v-else>课程筹备中</template>
           </span>
         </div>
         <button
@@ -161,3 +225,25 @@ function isDone(path) {
     </main>
   </div>
 </template>
+
+<style scoped>
+.course-back {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.course-title {
+  margin: 16px 0 8px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  letter-spacing: 0.2px;
+}
+
+.course-empty {
+  padding: 8px 10px 14px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+</style>

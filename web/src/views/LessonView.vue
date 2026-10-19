@@ -11,6 +11,7 @@ import PageNav from '../components/PageNav.vue'
 import TermCard from '../components/TermCard.vue'
 import { lessons } from '../data/lessons'
 import { allLessons } from '../data/course'
+import { courseOfLesson, courseLessons, coursePath } from '../data/courses'
 import { md } from '../utils/md'
 
 const route = useRoute()
@@ -26,14 +27,25 @@ const handmade = {
 const Comp = computed(() => handmade[code.value] || null)
 const lesson = computed(() => lessons[code.value] || null)
 
-const index = computed(() => allLessons.findIndex((l) => l.code === code.value))
+const course = computed(() => courseOfLesson(code.value))
+const courseLessonList = computed(() =>
+  course.value ? courseLessons(course.value) : allLessons
+)
+
+const index = computed(() =>
+  courseLessonList.value.findIndex((l) => l.code === code.value)
+)
 const prev = computed(() => {
-  const p = allLessons[index.value - 1]
-  return p && p.status === 'ready' ? { path: p.path, title: `${p.code} ${p.title}` } : null
+  const p = courseLessonList.value[index.value - 1]
+  return p && p.status === 'ready'
+    ? { path: p.path, title: `${p.code} ${p.title}` }
+    : null
 })
 const next = computed(() => {
-  const n = allLessons[index.value + 1]
-  return n && n.status === 'ready' ? { path: n.path, title: `${n.code} ${n.title}` } : null
+  const n = courseLessonList.value[index.value + 1]
+  return n && n.status === 'ready'
+    ? { path: n.path, title: `${n.code} ${n.title}` }
+    : null
 })
 </script>
 
@@ -41,6 +53,12 @@ const next = computed(() => {
   <component :is="Comp" v-if="Comp" />
 
   <div v-else-if="lesson" class="page">
+    <div v-if="course" class="crumb">
+      <router-link to="/" class="crumb-root">全部课程</router-link>
+      <span class="crumb-sep">/</span>
+      <router-link :to="coursePath(course)">{{ course.name }}</router-link>
+    </div>
+
     <div class="eyebrow">
       {{ lesson.code }} · {{ lesson.chapter }} · {{ lesson.minutes }} 分钟
     </div>
@@ -59,6 +77,35 @@ const next = computed(() => {
     <div class="eyebrow">课程</div>
     <h1>这节还没写</h1>
     <p>课程编号 <code>{{ code }}</code> 不存在或尚未上线。</p>
-    <router-link to="/" class="btn">返回课程首页</router-link>
+    <router-link to="/" class="btn">返回全部课程</router-link>
   </div>
 </template>
+
+<style scoped>
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-3);
+  margin-bottom: 14px;
+}
+
+.crumb a {
+  color: var(--text-3);
+  text-decoration: none;
+}
+
+.crumb a:hover {
+  color: var(--primary);
+}
+
+.crumb-root {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.crumb-sep {
+  color: var(--border-strong);
+}
+</style>
