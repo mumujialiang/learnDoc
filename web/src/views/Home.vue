@@ -10,7 +10,7 @@ const steps = [
   { t: '写 3 行 ADR', d: '为什么这么选，代价是什么' },
 ]
 
-const totalLessons = chapters.reduce((s, c) => s + c.lessons.length, 0)
+const totalLessons = readyLessons.length
 
 const featuredCodes = ['M0-02', 'M1-01', 'M3-04', 'M4-02', 'M5-02', 'M6-04']
 const featured = featuredCodes
@@ -33,7 +33,7 @@ const featured = featuredCodes
           <span class="hs-cap">节课</span>
         </div>
         <div class="hs">
-          <span class="hs-num">8</span>
+          <span class="hs-num">{{ chapters.length }}</span>
           <span class="hs-cap">个模块</span>
         </div>
         <div class="hs">
