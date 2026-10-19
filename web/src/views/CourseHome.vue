@@ -2,14 +2,39 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { courseById, courseChapters, courseLessons, courseMinutes } from '../data/courses'
+import {
+  courseById,
+  courseChapters,
+  courseLessons,
+  courseMinutes,
+} from '../data/courses'
+import { useProgress } from '../composables/useProgress'
 
 const route = useRoute()
+const { isLearned } = useProgress()
+
 const course = computed(() => courseById[route.params.courseId] || null)
 const chapters = computed(() => (course.value ? courseChapters(course.value) : []))
 const lessons = computed(() => (course.value ? courseLessons(course.value) : []))
-const firstLesson = computed(() => lessons.value[0] || null)
-const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) / 60)))
+const readyLessons = computed(() => lessons.value.filter((l) => l.status === 'ready'))
+const learnedCount = computed(
+  () => readyLessons.value.filter((l) => isLearned(l.path)).length
+)
+const nextLesson = computed(
+  () => readyLessons.value.find((l) => !isLearned(l.path)) || readyLessons.value[0] || null
+)
+const hours = computed(() =>
+  Math.max(1, Math.round(courseMinutes(course.value) / 60))
+)
+
+const LEVEL_LABEL = { core: '核心', important: '重要', optional: '选学' }
+const levelLabel = (level) => LEVEL_LABEL[level] || '重要'
+
+function moduleProgress(ch) {
+  const list = ch.lessons.filter((l) => l.status === 'ready')
+  const done = list.filter((l) => isLearned(l.path)).length
+  return `${done}/${list.length}`
+}
 </script>
 
 <template>
@@ -20,60 +45,69 @@ const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) 
 
     <div class="course-meta">
       <span class="pill">{{ course.subtitle }}</span>
-      <span v-if="course.status !== 'coming'" class="pill">{{ chapters.length }} 个模块</span>
-      <span v-if="course.status !== 'coming'" class="pill">{{ lessons.length }} 节</span>
-      <span v-if="course.status !== 'coming'" class="pill">约 {{ hours }} 小时</span>
-      <span v-else class="pill">筹备中</span>
+      <span class="pill">{{ chapters.length }} 个模块</span>
+      <span class="pill">已上线 {{ readyLessons.length }} / {{ lessons.length }} 节</span>
+      <span class="pill">约 {{ hours }} 小时</span>
+      <span class="pill">已学 {{ learnedCount }} 节</span>
     </div>
 
-    <template v-if="course.status === 'coming'">
-      <h2>计划中的大纲</h2>
-      <ol class="outline">
-        <li v-for="(item, i) in course.outline" :key="i">{{ item }}</li>
-      </ol>
-      <div class="callout info">
-        <span class="callout-icon">i</span>
-        <div class="callout-body">
-          这门课还在筹备。先看其他课程，或者回到门户挑一门。
-        </div>
+    <div class="course-progress">
+      <div class="cp-bar">
+        <span
+          :style="{
+            width:
+              (readyLessons.length ? (learnedCount / readyLessons.length) * 100 : 0) + '%',
+          }"
+        />
       </div>
-      <router-link to="/" class="btn">返回全部课程</router-link>
-    </template>
+      <span class="cp-text">
+        {{ readyLessons.length ? Math.round((learnedCount / readyLessons.length) * 100) : 0 }}%
+      </span>
+    </div>
 
-    <template v-else>
-      <h2>课程目录</h2>
-      <section v-for="ch in chapters" :key="ch.id" class="module-block">
-        <div class="module-head">
-          <span class="module-code mono">{{ ch.id }}</span>
-          <h3>{{ ch.label }}</h3>
-          <span class="pill">{{ ch.lessons.length }} 节</span>
-        </div>
-        <div class="lesson-list">
-          <router-link
-            v-for="l in ch.lessons"
-            :key="l.code"
-            :to="l.path"
-            class="lesson-card card card-hover"
-          >
-            <div class="lc-top">
-              <span class="mono lc-code">{{ l.code }}</span>
-              <span class="pill">{{ l.minutes }} 分钟</span>
-            </div>
-            <div class="lc-title">{{ l.title }}</div>
-          </router-link>
-        </div>
-      </section>
+    <h2>课程目录</h2>
+    <p class="order-note">按模块顺序学习；每节课学完后点右下角「标记为已学」。</p>
 
-      <div class="cta">
-        <div>
-          <div class="cta-title">从第一节开始</div>
-          <div class="cta-desc">{{ firstLesson?.code }} · {{ firstLesson?.title }}</div>
-        </div>
-        <router-link v-if="firstLesson" :to="firstLesson.path" class="btn primary">
-          开始学习 →
+    <section v-for="ch in chapters" :key="ch.id" class="module-block">
+      <div class="module-head">
+        <span class="module-code mono">{{ ch.id }}</span>
+        <h3>{{ ch.label }}</h3>
+        <span class="level-badge" :class="'lv-' + ch.level">{{ levelLabel(ch.level) }}</span>
+        <span class="module-progress">{{ moduleProgress(ch) }}</span>
+      </div>
+      <div class="lesson-list">
+        <router-link
+          v-for="l in ch.lessons"
+          :key="l.code"
+          :to="l.path"
+          class="lesson-card card card-hover"
+          :class="{ draft: l.status !== 'ready', done: isLearned(l.path) }"
+        >
+          <div class="lc-top">
+            <span class="mono lc-code">{{ l.code }}</span>
+            <span v-if="l.status !== 'ready'" class="pill">待写</span>
+            <span v-else-if="isLearned(l.path)" class="pill ok">已学 ✓</span>
+            <span v-else class="pill">{{ l.minutes }} 分钟</span>
+          </div>
+          <div class="lc-title">{{ l.title }}</div>
+          <div class="lc-foot">
+            <span class="level-badge small" :class="'lv-' + (l.level || ch.level)">
+              {{ levelLabel(l.level || ch.level) }}
+            </span>
+          </div>
         </router-link>
       </div>
-    </template>
+    </section>
+
+    <div v-if="nextLesson" class="cta">
+      <div>
+        <div class="cta-title">
+          {{ learnedCount ? '继续学习' : '从第一节开始' }}
+        </div>
+        <div class="cta-desc">{{ nextLesson.code }} · {{ nextLesson.title }}</div>
+      </div>
+      <router-link :to="nextLesson.path" class="btn primary">继续 →</router-link>
+    </div>
   </div>
 
   <div v-else class="page">
@@ -89,7 +123,41 @@ const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) 
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 18px 0 8px;
+  margin: 18px 0 12px;
+}
+
+.course-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+}
+
+.cp-bar {
+  flex: 1;
+  max-width: 320px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.cp-bar span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.cp-text {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.order-note {
+  font-size: 12.5px;
+  color: var(--text-3);
+  margin: -4px 0 8px;
 }
 
 .module-block {
@@ -101,6 +169,7 @@ const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) 
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .module-head h3 {
@@ -119,6 +188,13 @@ const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) 
   border-radius: 6px;
 }
 
+.module-progress {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
 .lesson-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -129,6 +205,15 @@ const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) 
   text-decoration: none;
   color: inherit;
   display: block;
+}
+
+.lesson-card.draft {
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+.lesson-card.done {
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
 }
 
 .lc-top {
@@ -151,11 +236,39 @@ const hours = computed(() => Math.max(1, Math.round(courseMinutes(course.value) 
   letter-spacing: -0.2px;
 }
 
-.outline {
-  margin: 16px 0 22px;
-  padding-left: 22px;
-  line-height: 2;
-  font-size: 14px;
+.lc-foot {
+  margin-top: 10px;
+}
+
+.level-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.level-badge.small {
+  font-size: 10px;
+  padding: 1px 7px;
+}
+
+.level-badge.lv-core {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.level-badge.lv-important {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.level-badge.lv-optional {
+  color: var(--text-3);
+  background: var(--surface-2, rgba(0, 0, 0, 0.03));
+  border-color: var(--border);
 }
 
 .cta {

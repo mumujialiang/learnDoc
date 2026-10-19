@@ -11,11 +11,16 @@ import {
   courseOfLesson,
   coursePath,
 } from './data/courses'
+import { useProgress } from './composables/useProgress'
 
 const route = useRoute()
+const { isLearned, toggleLearned } = useProgress()
+
+function toggleCurrentLesson() {
+  if (route.name === 'lesson') toggleLearned(route.path)
+}
 
 const theme = ref(localStorage.getItem('lm-theme') || 'light')
-const visited = ref(JSON.parse(localStorage.getItem('lm-visited') || '[]'))
 const progress = ref(0)
 const menuOpen = ref(false)
 
@@ -46,13 +51,6 @@ watch(
 watch(
   () => route.fullPath,
   () => {
-    if (route.name === 'lesson') {
-      const p = route.path
-      if (!visited.value.includes(p)) {
-        visited.value = [...visited.value, p]
-        localStorage.setItem('lm-visited', JSON.stringify(visited.value))
-      }
-    }
     menuOpen.value = false
     window.scrollTo(0, 0)
     requestAnimationFrame(updateProgress)
@@ -69,7 +67,7 @@ onMounted(() => window.addEventListener('scroll', updateProgress, { passive: tru
 onUnmounted(() => window.removeEventListener('scroll', updateProgress))
 
 const doneCount = computed(
-  () => progressLessons.value.filter((l) => visited.value.includes(l.path)).length
+  () => progressLessons.value.filter((l) => isLearned(l.path)).length
 )
 const donePercent = computed(() =>
   progressLessons.value.length
@@ -84,7 +82,7 @@ function isActive(path) {
   return route.path === path
 }
 function isDone(path) {
-  return visited.value.includes(path)
+  return isLearned(path)
 }
 </script>
 
@@ -140,7 +138,7 @@ function isDone(path) {
                 done: isDone(l.path),
               }"
             >
-              <span class="nav-dot" />
+              <span class="nav-dot" :class="'lv-' + (l.level || 'important')" />
               <span>{{ l.title }}</span>
               <span class="nav-code">{{ l.code }}</span>
             </router-link>
@@ -224,6 +222,15 @@ function isDone(path) {
       <router-view :key="route.path" />
     </main>
   </div>
+
+  <button
+    v-if="route.name === 'lesson'"
+    class="learn-fab"
+    :class="{ done: isLearned(route.path) }"
+    @click="toggleCurrentLesson"
+  >
+    {{ isLearned(route.path) ? '已学 ✓ 点击取消' : '标记为已学' }}
+  </button>
 </template>
 
 <style scoped>
@@ -245,5 +252,52 @@ function isDone(path) {
   padding: 8px 10px 14px;
   font-size: 12px;
   color: var(--text-3);
+}
+
+.nav-dot.lv-core {
+  background: var(--primary);
+}
+
+.nav-dot.lv-important {
+  background: var(--text-3);
+}
+
+.nav-dot.lv-optional {
+  background: var(--border-strong);
+}
+
+.learn-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.learn-fab:hover {
+  background: var(--primary-soft);
+}
+
+.learn-fab.done {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+@media (max-width: 720px) {
+  .learn-fab {
+    right: 16px;
+    bottom: 16px;
+    padding: 9px 14px;
+  }
 }
 </style>

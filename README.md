@@ -51,9 +51,11 @@ npm run dev
 # → http://localhost:5173
 ```
 
-**40 节全部上线**，从 `M0-01 环境与骨架` 到 `M7-02 验收清单与 Review`。
+**263 节全部上线**，分 9 门课：后端、数据库、并发、全栈架构、工程化、ERP、
+AI 编程、AI 应用开发、前端。
 
-课程正文是数据驱动的：内容在 `web/src/data/lessons/m0.js` ~ `m7.js`，
+课程正文是数据驱动的：内容在 `web/src/data/lessons/` 下的
+`m*.js`、`f*.js`、`a*.js`、`e*.js`、`h*.js`、`r*.js`、`s*.js`，
 由 `LessonRenderer.vue` 统一渲染。想改某一节，只改数据文件即可，不用碰组件。
 
 五个可交互可视化，全部实时绘制（不依赖任何图表库）：

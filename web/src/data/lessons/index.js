@@ -25,6 +25,26 @@ import a3 from './a3'
 import e1 from './e1'
 import e2 from './e2'
 import e3 from './e3'
+import h1 from './h1'
+import h2 from './h2'
+import h3 from './h3'
+import h4 from './h4'
+import h5 from './h5'
+import h6 from './h6'
+import h7 from './h7'
+import h8 from './h8'
+import h9 from './h9'
+import h10 from './h10'
+import h13 from './h13'
+import h15 from './h15'
+import r1 from './r1'
+import r2 from './r2'
+import r3r4 from './r3r4'
+import r5r6 from './r5r6'
+import s1 from './s1'
+import s2s3 from './s2s3'
+import s4s5 from './s4s5'
+import s6 from './s6'
 
 export const lessons = {
   ...m0,
@@ -54,4 +74,24 @@ export const lessons = {
   ...e1,
   ...e2,
   ...e3,
+  ...h1,
+  ...h2,
+  ...h3,
+  ...h4,
+  ...h5,
+  ...h6,
+  ...h7,
+  ...h8,
+  ...h9,
+  ...h10,
+  ...h13,
+  ...h15,
+  ...r1,
+  ...r2,
+  ...r3r4,
+  ...r5r6,
+  ...s1,
+  ...s2s3,
+  ...s4s5,
+  ...s6,
 }

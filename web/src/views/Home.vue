@@ -1,15 +1,33 @@
 <script setup>
 import { chapters, readyLessons } from '../data/course'
-import { courses, coursePath, courseLessonCount, courseMinutes } from '../data/courses'
+import {
+  courses,
+  coursePath,
+  courseLessonCount,
+  courseReadyLessons,
+  courseMinutes,
+} from '../data/courses'
 
 const totalModules = chapters.length
 const totalLessons = readyLessons.length
-const order = ['backend', 'database', 'concurrency', 'erp', 'ai', 'frontend']
+const order = [
+  'backend',
+  'database',
+  'concurrency',
+  'architecture',
+  'engineering',
+  'erp',
+  'ai',
+  'ai-app',
+  'frontend',
+]
 const learningPath = order.map((id) => courses.find((c) => c.id === id)).filter(Boolean)
 
 function cardMeta(c) {
   if (c.status === 'coming') return '筹备中'
-  return `${c.chapterIds.length} 个模块 · ${courseLessonCount(c)} 节`
+  const ready = courseReadyLessons(c).length
+  const total = courseLessonCount(c)
+  return `${c.chapterIds.length} 个模块 · ${ready}${ready < total ? ` / ${total}` : ''} 节`
 }
 
 function courseDesc(c) {

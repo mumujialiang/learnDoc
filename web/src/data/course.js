@@ -1,12 +1,74 @@
-const L = (code, title, minutes, status = 'ready') => ({
+const L = (code, title, minutes = 45, level = null, status = 'ready') => ({
   code,
   title,
   path: `/lesson/${code}`,
   minutes,
+  level,
   status,
 })
 
-export const chapters = [
+const D = (code, title, minutes, level = null) =>
+  L(code, title, minutes, level, 'draft')
+
+const CHAPTER_LEVEL = {
+  M0: 'core',
+  M1: 'core',
+  M2: 'core',
+  M3: 'core',
+  M4: 'important',
+  M5: 'core',
+  M6: 'important',
+  M7: 'important',
+  M8: 'core',
+  M9: 'core',
+  M10: 'core',
+  M11: 'important',
+  M12: 'important',
+  M13: 'core',
+  M14: 'core',
+  M15: 'important',
+  F1: 'core',
+  F2: 'important',
+  F3: 'core',
+  F4: 'important',
+  F5: 'important',
+  A1: 'core',
+  A2: 'core',
+  A3: 'important',
+  E1: 'core',
+  E2: 'core',
+  E3: 'important',
+  H1: 'core',
+  H2: 'core',
+  H3: 'core',
+  H4: 'important',
+  H5: 'important',
+  H6: 'important',
+  H7: 'important',
+  H8: 'important',
+  H9: 'important',
+  H10: 'optional',
+  H11: 'important',
+  H12: 'optional',
+  H13: 'important',
+  H14: 'optional',
+  H15: 'optional',
+  H16: 'optional',
+  R1: 'core',
+  R2: 'core',
+  R3: 'important',
+  R4: 'important',
+  R5: 'important',
+  R6: 'important',
+  S1: 'core',
+  S2: 'core',
+  S3: 'core',
+  S4: 'important',
+  S5: 'important',
+  S6: 'important',
+}
+
+const chapterList = [
   {
     id: 'M0',
     label: '后端心智模型',
@@ -344,10 +406,298 @@ export const chapters = [
       L('E3-04', '库存预警与安全库存', 45),
     ],
   },
+  // ===== 协议、身份与架构（补齐） =====
+  {
+    id: 'H1',
+    label: 'HTTP 与 API 协议',
+    lessons: [
+      L('H1-01', 'HTTP 方法与幂等', 55),
+      L('H1-02', '状态码与错误契约', 50),
+      L('H1-03', '缓存与内容协商', 50),
+      L('H1-04', 'CORS 与跨域', 45),
+      L('H1-05', '连接、超时与 HTTP/2', 50),
+    ],
+  },
+  {
+    id: 'H2',
+    label: '认证与授权',
+    lessons: [
+      L('H2-01', '会话与令牌', 55),
+      L('H2-02', 'OAuth2 与 OIDC', 55),
+      L('H2-03', 'SSO 与企业登录', 50),
+      L('H2-04', '密码、MFA 与授权模型', 55),
+    ],
+  },
+  {
+    id: 'H3',
+    label: '可观测性',
+    lessons: [
+      L('H3-01', '指标：系统现在怎么样'),
+      L('H3-02', '日志：发生了什么'),
+      L('H3-03', '链路追踪：慢在哪一步'),
+      L('H3-04', '告警与 SLO'),
+      L('H3-05', '事故响应与复盘'),
+    ],
+  },
+  {
+    id: 'H4',
+    label: '发布与 CI/CD',
+    lessons: [
+      L('H4-01', '流水线：从提交到上线'),
+      L('H4-02', '环境与制品管理'),
+      L('H4-03', '灰度、蓝绿与回滚'),
+      L('H4-04', 'Feature Flag 与配置'),
+    ],
+  },
+  {
+    id: 'H5',
+    label: '分布式事务与补偿',
+    lessons: [
+      L('H5-01', '2PC 与 TCC'),
+      L('H5-02', 'Saga：长事务编排'),
+      L('H5-03', '补偿与幂等'),
+      L('H5-04', '对账兜底'),
+    ],
+  },
+  {
+    id: 'H6',
+    label: '压测与性能调优',
+    lessons: [
+      L('H6-01', '指标与目标'),
+      L('H6-02', '压测方法与工具'),
+      L('H6-03', '瓶颈定位'),
+      L('H6-04', '容量规划'),
+    ],
+  },
+  {
+    id: 'H7',
+    label: '搜索',
+    lessons: [
+      L('H7-01', '全文索引与分词'),
+      L('H7-02', '相关性与排序'),
+      L('H7-03', '索引与数据同步'),
+      L('H7-04', '向量检索与 RAG'),
+    ],
+  },
+  {
+    id: 'H8',
+    label: '报表与数据分析',
+    lessons: [
+      L('H8-01', 'OLTP 与 OLAP'),
+      L('H8-02', '指标口径'),
+      L('H8-03', '预聚合与宽表'),
+      L('H8-04', '报表性能'),
+    ],
+  },
+  {
+    id: 'H9',
+    label: '实时通信',
+    lessons: [
+      L('H9-01', 'WebSocket 与 SSE'),
+      L('H9-02', '连接与心跳'),
+      L('H9-03', '可靠投递'),
+    ],
+  },
+  {
+    id: 'H10',
+    label: '合规与隐私',
+    lessons: [
+      L('H10-01', '个人信息保护'),
+      L('H10-02', '脱敏与审计'),
+      L('H10-03', '保留与删除'),
+    ],
+  },
+  {
+    id: 'H11',
+    label: '消息中间件',
+    lessons: [
+      L('H11-01', '队列模型对比'),
+      L('H11-02', '分区与消费组'),
+      L('H11-03', '事件版本与重放'),
+    ],
+  },
+  {
+    id: 'H12',
+    label: '云原生部署',
+    lessons: [
+      L('H12-01', '容器与镜像'),
+      L('H12-02', '编排与滚动发布'),
+      L('H12-03', '云服务与成本'),
+    ],
+  },
+  {
+    id: 'H13',
+    label: '架构演进',
+    lessons: [
+      L('H13-01', '单体与模块化单体'),
+      L('H13-02', '服务拆分'),
+      L('H13-03', '边界与依赖'),
+      L('H13-04', '架构决策记录'),
+    ],
+  },
+  {
+    id: 'H14',
+    label: '契约与混沌',
+    lessons: [
+      L('H14-01', '接口契约'),
+      L('H14-02', '故障注入'),
+      L('H14-03', '测试数据管理'),
+    ],
+  },
+  {
+    id: 'H15',
+    label: 'SSR 与微前端',
+    lessons: [
+      L('H15-01', 'SSR 与 SSG'),
+      L('H15-02', '同构渲染'),
+      L('H15-03', '微前端'),
+    ],
+  },
+  {
+    id: 'H16',
+    label: '对象存储工程',
+    lessons: [
+      L('H16-01', '直传与预签名'),
+      L('H16-02', '分片与断点续传'),
+      L('H16-03', 'CDN 与安全'),
+    ],
+  },
+  // ===== AI 应用开发课 =====
+  {
+    id: 'R1',
+    label: 'RAG 工程',
+    lessons: [
+      L('R1-01', '切分策略', 50),
+      L('R1-02', 'Embedding 与向量库', 50),
+      L('R1-03', '混合检索与重排', 50),
+      L('R1-04', 'RAG 评估', 50),
+      L('R1-05', '知识库更新', 45),
+    ],
+  },
+  {
+    id: 'R2',
+    label: 'Agent 与工具调用',
+    lessons: [
+      L('R2-01', 'Function Calling 基础', 50),
+      L('R2-02', '工具设计', 45),
+      L('R2-03', '循环、终止与失败恢复', 50),
+      L('R2-04', '权限与沙箱', 45),
+      L('R2-05', '多 Agent 协作', 45),
+    ],
+  },
+  {
+    id: 'R3',
+    label: '评测与回归',
+    lessons: [
+      L('R3-01', '评测集构建', 45),
+      L('R3-02', '自动评分', 45),
+      L('R3-03', '人工评估', 40),
+      L('R3-04', '回归门禁', 45),
+    ],
+  },
+  {
+    id: 'R4',
+    label: 'Prompt 版本管理',
+    lessons: [
+      L('R4-01', 'Prompt 模板化', 40),
+      L('R4-02', '版本与灰度', 45),
+      L('R4-03', '注入防护', 45),
+      L('R4-04', '回滚与审计', 40),
+    ],
+  },
+  {
+    id: 'R5',
+    label: '成本与配额',
+    lessons: [
+      L('R5-01', 'Token 计量', 45),
+      L('R5-02', '缓存与模型路由', 45),
+      L('R5-03', '预算与告警', 40),
+      L('R5-04', '降级策略', 45),
+    ],
+  },
+  {
+    id: 'R6',
+    label: 'AI 安全与合规',
+    lessons: [
+      L('R6-01', '输出安全', 45),
+      L('R6-02', '数据隔离与越权', 45),
+      L('R6-03', '内容审核与审计', 40),
+    ],
+  },
+  // ===== 全栈架构设计课 =====
+  {
+    id: 'S1',
+    label: '从需求到架构',
+    lessons: [
+      L('S1-01', '需求拆解', 50),
+      L('S1-02', '约束与容量', 45),
+      L('S1-03', '技术选型', 45),
+      L('S1-04', '架构方案评审', 45),
+    ],
+  },
+  {
+    id: 'S2',
+    label: '分层与模块边界',
+    lessons: [
+      L('S2-01', '分层架构', 45),
+      L('S2-02', '模块化与边界', 45),
+      L('S2-03', '依赖方向与接口', 45),
+      L('S2-04', '跨模块查询', 45),
+    ],
+  },
+  {
+    id: 'S3',
+    label: '数据与一致性架构',
+    lessons: [
+      L('S3-01', '数据模型与存储选型', 45),
+      L('S3-02', '读写分离与分片', 45),
+      L('S3-03', '缓存架构', 45),
+      L('S3-04', '一致性与对账', 45),
+    ],
+  },
+  {
+    id: 'S4',
+    label: '部署与流量架构',
+    lessons: [
+      L('S4-01', '部署拓扑', 45),
+      L('S4-02', '网关与鉴权', 45),
+      L('S4-03', '服务间通信', 45),
+      L('S4-04', '可观测与容量', 45),
+    ],
+  },
+  {
+    id: 'S5',
+    label: '演进与治理',
+    lessons: [
+      L('S5-01', '单体到服务化', 45),
+      L('S5-02', '技术债管理', 40),
+      L('S5-03', '多环境与发布', 45),
+      L('S5-04', '架构治理', 40),
+    ],
+  },
+  {
+    id: 'S6',
+    label: '架构案例',
+    lessons: [
+      L('S6-01', '商城架构拆解', 50),
+      L('S6-02', 'ERP 架构拆解', 50),
+      L('S6-03', 'SaaS 多租户架构', 50),
+    ],
+  },
 ]
 
+export const chapters = chapterList.map((c) => ({
+  ...c,
+  level: c.level || CHAPTER_LEVEL[c.id] || 'important',
+}))
+
 export const allLessons = chapters.flatMap((c) =>
-  c.lessons.map((l) => ({ ...l, chapterId: c.id, chapterLabel: c.label }))
+  c.lessons.map((l) => ({
+    ...l,
+    level: l.level || c.level || 'important',
+    chapterId: c.id,
+    chapterLabel: c.label,
+  }))
 )
 
 export const readyLessons = allLessons.filter((l) => l.status === 'ready')

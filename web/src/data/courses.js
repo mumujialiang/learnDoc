@@ -9,7 +9,7 @@ export const courses = [
     subtitle: '给前端的后端入门',
     tagline: '从心智模型、领域建模、API 到交易、异步、可观测与安全，教你判断 AI 写的代码能不能上生产。',
     icon: '◧',
-    chapterIds: ['M0', 'M1', 'M2', 'M3', 'M5', 'M6', 'M8'],
+    chapterIds: ['M0', 'M1', 'M2', 'M3', 'M5', 'M6', 'M8', 'H1', 'H2', 'H5', 'H7', 'H9', 'H11'],
   },
   {
     id: 'database',
@@ -17,7 +17,7 @@ export const courses = [
     subtitle: '事务、索引、对象与运维',
     tagline: '不背语法：隔离级别、锁、执行计划、迁移与容量，这些才决定数据库在真实负载下的表现。',
     icon: '▦',
-    chapterIds: ['M9', 'M10', 'M11', 'M12'],
+    chapterIds: ['M9', 'M10', 'M11', 'M12', 'H8'],
   },
   {
     id: 'concurrency',
@@ -25,7 +25,7 @@ export const courses = [
     subtitle: '线程、协程与资源保护',
     tagline: '从进程线程协程，到连接池、背压、限流，再到并发下的幂等与一致性。',
     icon: '◫',
-    chapterIds: ['M13', 'M14', 'M15'],
+    chapterIds: ['M13', 'M14', 'M15', 'H6'],
   },
   {
     id: 'erp',
@@ -44,12 +44,36 @@ export const courses = [
     chapterIds: ['M7', 'A1', 'A2', 'A3'],
   },
   {
+    id: 'ai-app',
+    name: 'AI 应用开发课',
+    subtitle: '把 LLM 做成可靠功能',
+    tagline: 'RAG、Agent、评测、Prompt 版本、成本与安全：做 AI 功能，而不只是用 AI 写代码。',
+    icon: '✧',
+    chapterIds: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'],
+  },
+  {
+    id: 'architecture',
+    name: '全栈架构设计课',
+    subtitle: '从需求到演进',
+    tagline: '需求拆解、模块边界、数据一致性、部署拓扑与架构演进，一套完整的判断框架。',
+    icon: '▣',
+    chapterIds: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'],
+  },
+  {
     id: 'frontend',
     name: '前端工程师课',
     subtitle: '后端转前端 · Vue 方向',
     tagline: '不只讲 Vue：浏览器运行时、TypeScript、组件设计、状态管理、工程化与性能。',
     icon: '◐',
-    chapterIds: ['F1', 'F2', 'F3', 'F4', 'F5'],
+    chapterIds: ['F1', 'F2', 'F3', 'F4', 'F5', 'H15'],
+  },
+  {
+    id: 'engineering',
+    name: '工程化与架构课',
+    subtitle: '可观测、发布、架构与合规',
+    tagline: '上线之后才真正开始：指标与告警、流水线与回滚、架构边界、对象存储与合规。',
+    icon: '◈',
+    chapterIds: ['H3', 'H4', 'H13', 'H14', 'H10', 'H12', 'H16'],
   },
 ]
 
@@ -66,8 +90,17 @@ export function courseChapters(course) {
 
 export function courseLessons(course) {
   return courseChapters(course).flatMap((c) =>
-    c.lessons.map((l) => ({ ...l, chapterId: c.id, chapterLabel: c.label }))
+    c.lessons.map((l) => ({
+      ...l,
+      level: l.level || c.level || 'important',
+      chapterId: c.id,
+      chapterLabel: c.label,
+    }))
   )
+}
+
+export function courseReadyLessons(course) {
+  return courseLessons(course).filter((l) => l.status === 'ready')
 }
 
 export function courseOfLesson(code) {
