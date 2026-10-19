@@ -11,7 +11,7 @@
 
 线上地址：<https://mumujialiang.github.io/learnDoc/>
 
-当前规模：**9 门课 / 55 个模块 / 263 节**，全部已上线。
+当前规模：**12 门课 / 73 个模块 / 338 节**，全部已上线。
 
 ## 目录结构
 
@@ -21,7 +21,7 @@ alembic/                数据库迁移
 scripts/smoke.py        健康检查、连接观察、并发压测脚本
 docs/                   原始讲义（course/）、架构决策（adr/）、SQL Server 对照
 web/                    课程站
-  src/data/lessons/     课程内容：m*.js / f*.js / a*.js / e*.js / h*.js / r*.js / s*.js
+  src/data/lessons/     课程内容：m* / f* / a* / e* / h* / r* / s* / b* / c* / d*
   src/data/course.js    模块与课时目录（chapters）
   src/data/courses.js   课程门户与模块映射（courses）
   src/components/       LessonRenderer 等通用组件
@@ -134,6 +134,8 @@ $course | Where-Object { $_ -and $_ -notin $data }
 - **默认不展示代码**。`CodeBlock` 默认折叠；只有终端命令和报错原文适合展开。
 - 每节结构尽量包含：真实场景 → 机制拆解 → 概念对照 → 失败模式 → 边界取舍 →
   验收清单 → 动手验证 → 小结 → 延伸问题。
+- 密度基准：参考 `views/Lesson01.vue`（M0-01），正文约 2800 字、渲染高度约 7000px。
+  新写或重写课时目标 1800–2500 字、9–11 个板块；不要用空话凑长度。
 - 讲「怎么判断」，不写「照着敲」的教程。
 - 避免绝对路径资源（如 `/logo.png`），GitHub Pages 部署在 `/learnDoc/` 子路径。
 
@@ -177,8 +179,9 @@ git push origin main
 
 ## 当前待办
 
-- 深度统一：M9（事务与并发）与新增的 H 系列是 12 板块左右的深度版，
-  其余课程仍按旧密度，需按同标准逐步重写。
-- 打包优化：所有课程数据打进同一个 chunk，产物约 867 KB（gzip 307 KB），
+- 深度统一：M9 已是深度版；并发课 28 节、数据库 M10–M12/H8 32 节、
+  后端 M2 5 节已首轮加厚（约 750–1180 字，仍低于 M0-01，需第二轮）。
+  后端其余模块按 H11 → M6 → M5 → H9 → H7 → H5 顺序继续。
+- 打包优化：所有课程数据打进同一个 chunk，产物约 1.1 MB（gzip 384 KB），
   应改为按课程/模块动态导入。
 - 课程站暂无自动化测试；修改后至少跑 `npm run build` 与一次浏览器冒烟。

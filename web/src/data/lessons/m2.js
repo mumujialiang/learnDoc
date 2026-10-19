@@ -3,98 +3,121 @@ export default {
     code: 'M2-01',
     title: '资源建模 vs 动作建模',
     chapter: 'API 与鉴权',
-    minutes: 40,
+    minutes: 50,
     lead:
-      'REST 教你用名词描述资源：GET /orders/1。\n' +
-      '但总会遇到说不成名词的操作 ——「把这张单取消掉」。硬塞进 REST 会很别扭。',
+      '接口设计的第一道分歧：把系统看成「资源」，还是看成「动作」。\n' +
+      '选错了，接口会越加越乱，前端也不知道该调哪个。',
     terms: [
       {
         en: '资源建模',
-        zh: 'REST 风格',
-        plain: 'URL 指向一个「东西」，用 GET/POST/PATCH/DELETE 表示对它做什么。',
+        zh: 'resource modeling',
+        plain: '用名词表示实体，用 HTTP 方法表达操作。',
       },
       {
         en: '动作建模',
-        zh: 'RPC 风格',
-        plain: 'URL 指向一件「事」，POST 一下就执行，比如 /orders/1/cancel。',
+        zh: 'action modeling',
+        plain: '用动词表示业务操作，如 /orders/{id}/cancel。',
+      },
+      {
+        en: '幂等',
+        zh: 'idempotency',
+        plain: '同一请求执行多次，结果一致。',
+      },
+      {
+        en: '状态迁移',
+        zh: 'state transition',
+        plain: '业务状态从一种合法状态变到另一种。',
       },
     ],
     blocks: [
-      { type: 'h2', text: '一、能用名词表达的，就用名词' },
+      { type: 'h2', text: '一、先看两个接口' },
       {
-        type: 'table',
-        head: ['操作', '资源写法', '动作写法'],
+        type: 'table', head: ['写法', '风格'],
         rows: [
-          ['查订单', 'GET /orders/1', '—'],
-          ['新建订单', 'POST /orders', '—'],
-          ['取消订单', '—', 'POST /orders/1/cancel'],
-          ['批量改价', '—', 'POST /skus/batch-price'],
+          ['POST /orders/{id}/cancel', '动作'],
+          ['PATCH /orders/{id} {status: canceled}', '资源'],
         ],
       },
       {
         type: 'p',
-        text: '判断标准很简单：能不能用一个名词描述它？「订单」是名词，「取消」不是。',
+        text:
+          '取消订单不是简单改字段，还要释放库存、退款、通知。' +
+          '这时候动作接口更清楚，也更容易做权限和幂等。',
       },
 
-      { type: 'h2', text: '二、硬套 REST 的典型翻车' },
+      { type: 'h2', text: '二、什么时候用资源' },
       {
-        type: 'code',
-        lang: 'http',
-        title: '✕ 把状态当字段改',
-        code: `
-PATCH /orders/1
-{ "status": "cancelled" }
-`,
+        type: 'list', items: [
+          '标准增删改查',
+          '资源之间的关系明确',
+          '前端需要通用列表/详情',
+          '缓存、分页、过滤规则统一',
+        ],
       },
-      { type: 'p', text: '这个接口有什么问题？它允许把 status 改成任意值。' },
+
+      { type: 'h2', text: '三、什么时候用动作' },
+      {
+        type: 'list', items: [
+          '有复杂业务规则',
+          '一次操作改多张表',
+          '需要独立权限',
+          '需要幂等键/审批流',
+        ],
+      },
+
+      { type: 'h2', text: '四、混合使用' },
       {
         type: 'p',
-        text: '而「取消订单」这件事要校验是否已发货、要退库存、要退款、要发通知。这些逻辑藏在哪？没人知道，因为接口名里没说。',
-      },
-      {
-        type: 'callout',
-        kind: 'warn',
         text:
-          '**状态变更不是赋值。** 它是一件有前置条件、有副作用的业务动作。\n' +
-          '把它做成 PATCH status，等于把所有校验都扔掉了。',
+          '大部分系统是混合的：资源用 CRUD，关键业务用动作。' +
+          '不要为了「RESTful 纯粹」把取消订单硬写成 PATCH。',
       },
 
-      { type: 'h2', text: '三、HTTP 方法本身带语义' },
+      { type: 'h2', text: '五、常见失败' },
       {
-        type: 'table',
-        head: ['方法', '幂等吗', '能自动重试吗'],
+        type: 'table', head: ['错误', '后果'],
         rows: [
-          ['GET', '是', '能'],
-          ['PUT', '是', '能'],
-          ['DELETE', '是', '能'],
-          ['POST', '否', '不能，除非带幂等键'],
+          ['所有操作都 CRUD', '业务规则藏进字段'],
+          ['所有操作都动作', '接口爆炸'],
+          ['动作接口无幂等', '重复取消/退款'],
+          ['资源接口无权限区分', '越权'],
         ],
-      },
-      {
-        type: 'callout',
-        kind: 'info',
-        text:
-          '为什么 POST 不幂等：它通常表示「创建」或「执行一个动作」。\n' +
-          '重试一次，可能建出两条订单。所以 POST 要么带幂等键，要么明确告诉调用方「别自动重试」。',
       },
 
-      { type: 'h2', text: '四、验收' },
+      { type: 'h2', text: '六、验收' },
       {
-        type: 'checklist',
-        items: [
-          { k: 'URL 里没有多余的动词', v: '看一遍路由列表' },
-          { k: '状态变更走独立的动作接口', v: '看订单相关接口' },
-          { k: 'GET 接口不产生任何副作用', v: '搜 get 里的写操作' },
-          { k: 'POST 接口有幂等键，或文档里写了不重试', v: '看接口文档' },
+        type: 'checklist', items: [
+          { k: '资源与动作边界清晰', v: '看接口清单' },
+          { k: '动作有独立权限', v: '看鉴权' },
+          { k: '动作有幂等设计', v: '看实现' },
+          { k: '状态迁移合法', v: '看状态机' },
+          { k: '命名一致', v: '审查' },
         ],
       },
-      { type: 'h2', text: '五、课后问题' },
+
+      { type: 'h2', text: '七、动手验证' },
       {
-        type: 'list',
-        items: [
-          '批量操作（一次改 100 个商品价格）该怎么设计 URL？',
-          '一个接口同时修改多个资源，用 PATCH 还是 POST？',
-          '为什么说「URL 是写给排查问题的人看的」？',
+        type: 'list', items: [
+          '把取消订单分别写成两种接口',
+          '对比权限、幂等、错误处理',
+          '让前端分别调用，记录差异',
+        ],
+      },
+
+      { type: 'h2', text: '八、本课小结' },
+      {
+        type: 'callout', kind: 'info',
+        text: '资源建模管通用 CRUD，动作建模管业务规则；不要用纯粹性绑架可维护性。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
+      {
+        type: 'list', items: [
+          '取消订单为什么不适合 PATCH？',
+          '动作接口怎么做幂等？',
+          '资源接口怎么表达状态迁移？',
+          '两种风格能混用吗？',
+          '如何避免接口爆炸？',
         ],
       },
     ],
@@ -104,110 +127,116 @@ PATCH /orders/1
     code: 'M2-02',
     title: '分页',
     chapter: 'API 与鉴权',
-    minutes: 40,
+    minutes: 50,
     lead:
-      '前端要「第 1000 页」，后端写了 limit 20 offset 19980。\n' +
-      '数据库为了返回这 20 条，先把前 20000 条扫了一遍，然后扔掉。',
+      '分页看起来只是 limit/offset，\n' +
+      '但深分页、数据变化、总数统计，都会让接口变慢或结果错乱。',
     terms: [
       {
-        en: 'offset 分页',
-        zh: '偏移分页',
-        plain: 'limit + offset。翻得越深越慢，因为要跳过前面所有行。',
+        en: '偏移分页',
+        zh: 'offset pagination',
+        plain: '用 offset + limit 跳页，简单但深页慢。',
       },
       {
-        en: 'cursor 分页',
-        zh: '游标分页',
-        plain: '用「上一页最后一条的 id」作为起点，不数前面的。翻到多深都一样快。',
+        en: '游标分页',
+        zh: 'cursor pagination',
+        plain: '用上一页最后一条的排序键作为下一页起点。',
+      },
+      {
+        en: '总数',
+        zh: 'total count',
+        plain: '满足条件的总行数，通常要额外 count 查询。',
+      },
+      {
+        en: '稳定性',
+        zh: 'stability',
+        plain: '翻页过程中数据增删，是否会出现重复/漏行。',
       },
     ],
     blocks: [
-      { type: 'h2', text: '一、offset 的代价' },
-      {
-        type: 'code',
-        lang: 'sql',
-        code: `select * from orders order by id limit 20 offset 19980;`,
-      },
+      { type: 'h2', text: '一、先看一个翻页错乱' },
       {
         type: 'p',
-        text: '数据库必须先定位到第 19981 行。前 19980 行它不返回，但得一行行读过去。页数越深越慢，这是 O(n)。',
-      },
-      {
-        type: 'chain',
-        kind: 'danger',
-        items: [
-          { text: '第 1 页 8ms' },
-          { text: '第 100 页 120ms' },
-          { text: '第 1000 页 1.2s' },
-          { text: '第 5000 页 超时', mark: true },
-        ],
-      },
-
-      { type: 'h2', text: '二、游标分页怎么解' },
-      {
-        type: 'code',
-        lang: 'sql',
-        title: '用上一页的最后一条当起点',
-        code: `
--- 第一页
-select * from orders order by id desc limit 20;
-
--- 下一页
-select * from orders
-where id < :last_id
-order by id desc
-limit 20;
-`,
-      },
-      {
-        type: 'p',
-        text: '`where id < last_id` 能直接走索引定位，不管翻到第几页，都只读 20 行。',
-      },
-      {
-        type: 'callout',
-        kind: 'info',
         text:
-          '代价是**不能跳页**。用户只能「下一页」，没法直接跳到第 50 页。\n' +
-          '信息流、聊天记录、无限滚动适合游标；后台管理表格需要跳页，那就得忍受 offset。',
+          '用户翻到第 2 页时，前面插入了一条新数据，' +
+          '第 2 页第一条其实是上一页的最后一条，用户看到重复。',
       },
 
-      { type: 'h2', text: '三、total 比你想的贵' },
-      { type: 'p', text: '列表接口经常顺手返回总数。但 `count(*)` 在大表上要扫全表或全索引。' },
+      { type: 'h2', text: '二、两种分页' },
       {
-        type: 'list',
-        items: [
-          '能不给就不给：无限滚动根本不需要总数',
-          '非要给：缓存 count，或用估算值（PostgreSQL 的 reltuples）',
-          '数据量小（10 万以内）：随便 count',
+        type: 'table', head: ['方式', '优点', '缺点'],
+        rows: [
+          ['offset/limit', '简单、可跳页', '深页慢、易重复'],
+          ['游标', '快、稳定', '不能跳页'],
         ],
       },
 
-      { type: 'h2', text: '四、参数要防呆' },
+      { type: 'h2', text: '三、总数怎么处理' },
       {
-        type: 'code',
-        lang: 'python',
-        code: `
-size = min(page_size, 100)      # 不给用户传 10000 的机会
-cursor = decode_signed(request.cursor)  # 游标要签名，防止被篡改
-`,
-      },
-
-      { type: 'h2', text: '五、验收' },
-      {
-        type: 'checklist',
-        items: [
-          { k: '深分页接口 P99 在 100ms 内', v: '翻到第 1000 页压测' },
-          { k: 'page_size 有上限', v: '传 10000 试试' },
-          { k: '排序字段有索引', v: 'explain 看执行计划' },
-          { k: '游标做了签名或加密', v: '改一个字符看会不会崩' },
+        type: 'list', items: [
+          '精确 count 大表很慢',
+          '可以缓存总数或近似值',
+          '后台系统可以显示「约 N 条」',
+          '无限滚动不需要总数',
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
+
+      { type: 'h2', text: '四、怎么选' },
       {
-        type: 'list',
-        items: [
-          '为什么 order by 用到的字段必须有索引？',
-          '页面上显示「共 12345 条」，这个数字一定要精确吗？',
-          '翻页过程中有新数据插入，offset 分页会出现什么问题？',
+        type: 'table', head: ['场景', '建议'],
+        rows: [
+          ['后台表格', 'offset + 限制最大页'],
+          ['信息流', '游标'],
+          ['导出', '异步任务'],
+          ['搜索结果', '游标或固定快照'],
+        ],
+      },
+
+      { type: 'h2', text: '五、常见失败' },
+      {
+        type: 'table', head: ['错误', '后果'],
+        rows: [
+          ['深 offset', '越翻越慢'],
+          ['排序键不唯一', '游标丢行/重复'],
+          ['每次精确 count', '大表卡顿'],
+          ['无最大 limit', '一次拉全表'],
+        ],
+      },
+
+      { type: 'h2', text: '六、验收' },
+      {
+        type: 'checklist', items: [
+          { k: 'limit 有上限', v: '看参数校验' },
+          { k: '排序键唯一且稳定', v: '看 SQL' },
+          { k: '深分页有方案', v: '游标/限制' },
+          { k: '总数有缓存或近似', v: '看实现' },
+          { k: '翻页过程不重不漏', v: '并发插入测试' },
+        ],
+      },
+
+      { type: 'h2', text: '七、动手验证' },
+      {
+        type: 'list', items: [
+          '对比第 1 页与第 5000 页耗时',
+          '翻页时插入新数据，观察重复',
+          '改成游标分页，再测一次',
+        ],
+      },
+
+      { type: 'h2', text: '八、本课小结' },
+      {
+        type: 'callout', kind: 'info',
+        text: '分页的核心是「稳定 + 可控」，不是只把 limit 拼进 SQL。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
+      {
+        type: 'list', items: [
+          '深分页为什么慢？',
+          '游标分页为什么不能跳页？',
+          '总数一定要精确吗？',
+          '排序键不唯一会怎样？',
+          '如何防止一次拉全表？',
         ],
       },
     ],
@@ -217,124 +246,113 @@ cursor = decode_signed(request.cursor)  # 游标要签名，防止被篡改
     code: 'M2-03',
     title: '鉴权与 RBAC',
     chapter: 'API 与鉴权',
-    minutes: 55,
+    minutes: 50,
     lead:
-      '认证是「你是谁」，授权是「你能干什么」。\n' +
-      '这两个词天天被混用，混用的后果是：登录了就等于什么都能干。',
+      '认证回答「你是谁」，鉴权回答「你能做什么」。\n' +
+      '只做认证不做鉴权，等于登录后的用户什么都能干。',
     terms: [
       {
-        en: 'authentication',
-        zh: '认证',
-        plain: '证明你是你。登录就是认证。失败返回 401。',
+        en: '认证',
+        zh: 'authentication',
+        plain: '确认请求者身份，如登录、Token。',
       },
       {
-        en: 'authorization',
-        zh: '授权',
-        plain: '你有没有权限干这件事。失败返回 403。',
+        en: '鉴权',
+        zh: 'authorization',
+        plain: '判断该身份是否有权限执行操作。',
       },
       {
         en: 'RBAC',
         zh: '基于角色的访问控制',
-        plain: '用户 → 角色 → 权限。不给用户直接配权限，给他角色。',
+        plain: '用户绑定角色，角色绑定权限。',
+      },
+      {
+        en: '越权',
+        zh: 'broken access control',
+        plain: '用户访问了不属于自己的资源。',
       },
     ],
     blocks: [
-      { type: 'h2', text: '一、先分清两件事' },
+      { type: 'h2', text: '一、先看一个越权' },
       {
-        type: 'table',
-        head: ['问题', '属于', '该返回'],
+        type: 'p',
+        text:
+          '订单详情接口只校验了「已登录」，没校验订单归属。' +
+          '用户把 URL 里的 id 改成别人的，就能看到别人的订单。',
+      },
+
+      { type: 'h2', text: '二、RBAC 怎么落' },
+      {
+        type: 'table', head: ['层', '内容'],
         rows: [
-          ['你是谁？', '认证', '401'],
-          ['你能不能干这个？', '授权', '403'],
+          ['用户', '绑定角色'],
+          ['角色', '绑定权限'],
+          ['权限', '接口/资源/操作'],
+          ['校验', '每次请求判断'],
         ],
       },
+
+      { type: 'h2', text: '三、两种越权' },
       {
-        type: 'callout',
-        kind: 'warn',
-        text:
-          '401 和 403 混用，前端就没法处理：401 该跳登录页，403 该提示「无权限」。\n' +
-          '搞反了，用户会卡在登录页里无限循环。',
+        type: 'list', items: [
+          '水平越权：同角色访问别人的资源',
+          '垂直越权：低权限执行高权限操作',
+        ],
       },
 
-      { type: 'h2', text: '二、JWT 和 Session 的取舍' },
+      { type: 'h2', text: '四、校验放哪' },
       {
-        type: 'table',
-        head: ['', 'JWT', 'Session'],
+        type: 'p',
+        text:
+          '接口层做粗粒度权限，服务层做数据归属校验；' +
+          '不能只靠前端隐藏按钮。',
+      },
+
+      { type: 'h2', text: '五、常见失败' },
+      {
+        type: 'table', head: ['错误', '后果'],
         rows: [
-          ['状态存在哪', '客户端（token 里）', '服务端（Redis）'],
-          ['能主动踢人吗', '不能，除非维护黑名单', '能，删掉就行'],
-          ['横向扩展', '天然支持', '需要共享存储'],
-        ],
-      },
-      {
-        type: 'callout',
-        kind: 'danger',
-        text:
-          '**JWT 最大的坑：签发之后没法作废。**\n' +
-          '用户被禁用、改了密码，旧 token 依然有效，直到过期。\n' +
-          '解法：access token 设短（15 分钟），配 refresh token，refresh 存服务端。',
-      },
-
-      { type: 'h2', text: '三、RBAC 的表' },
-      {
-        type: 'code',
-        lang: 'sql',
-        code: `
-create table role (id bigserial primary key, name varchar(32) unique);
-
-create table permission (
-  id   bigserial primary key,
-  code varchar(64) unique          -- order:read / order:refund
-);
-
-create table user_role (
-  user_id bigint not null,
-  role_id bigint not null,
-  primary key (user_id, role_id)
-);
-
-create table role_permission (
-  role_id       bigint not null,
-  permission_id bigint not null,
-  primary key (role_id, permission_id)
-);
-`,
-      },
-      {
-        type: 'callout',
-        kind: 'info',
-        text:
-          '为什么不给用户直接配权限：1000 个用户 × 50 个权限 = 5 万行。\n' +
-          '改一次规则，全公司要改 1000 次。给角色配，改一次生效一片。',
-      },
-
-      { type: 'h2', text: '四、权限检查放在哪一层' },
-      {
-        type: 'list',
-        items: [
-          '路由层：`@require("order:refund")`，挡住 90% 的越权',
-          '数据层：「只能查自己门店的订单」—— 数据权限，比功能权限难得多',
-          '业务层：「金额超 10 万要二级审批」—— 这是流程规则，不是权限',
+          ['只认证不鉴权', '登录即全权限'],
+          ['只查 id 不查归属', '水平越权'],
+          ['前端隐藏按钮', '直接调接口绕过'],
+          ['角色权限硬编码', '难维护'],
         ],
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '六、验收' },
       {
-        type: 'checklist',
-        items: [
-          { k: '401 和 403 分开返回', v: '分别触发一次' },
-          { k: 'access token 有效期不超过 30 分钟', v: '看配置' },
-          { k: '没权限的接口真的被挡住', v: '用低权限账号试' },
-          { k: '权限码是数据，不是写死的 if-else', v: '读代码' },
+        type: 'checklist', items: [
+          { k: '每个接口有权限声明', v: '看路由' },
+          { k: '查询带归属条件', v: '看 SQL' },
+          { k: '换用户测试不越权', v: '构造请求' },
+          { k: '角色可配置', v: '看后台' },
+          { k: '越权有日志', v: '看审计' },
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
+
+      { type: 'h2', text: '七、动手验证' },
       {
-        type: 'list',
-        items: [
-          '用户改了密码，旧的 token 还能用吗？该怎么处理？',
-          '数据权限（只能看自己门店的订单）该怎么实现？',
-          '前端需要做权限判断吗？还是全靠后端？',
+        type: 'list', items: [
+          '用 A 用户请求 B 用户订单',
+          '用普通用户调用管理员接口',
+          '检查 SQL 是否带 user_id',
+        ],
+      },
+
+      { type: 'h2', text: '八、本课小结' },
+      {
+        type: 'callout', kind: 'info',
+        text: '认证解决身份，鉴权解决边界；资源归属校验必须在服务端。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
+      {
+        type: 'list', items: [
+          '水平越权和垂直越权有什么区别？',
+          'RBAC 和 ABAC 怎么选？',
+          '为什么不能只靠前端隐藏？',
+          '权限应该放在路由还是服务？',
+          '如何测试越权？',
         ],
       },
     ],
@@ -344,118 +362,114 @@ create table role_permission (
     code: 'M2-04',
     title: '校验与 DTO 分层',
     chapter: 'API 与鉴权',
-    minutes: 40,
+    minutes: 50,
     lead:
-      '把请求体直接丢给 ORM 模型，是最省事也最危险的做法。\n' +
-      '用户多传一个字段，就可能改掉不该改的东西。',
+      '请求体不是内部对象。\n' +
+      '把外部输入直接塞进 ORM 模型，轻则字段被改，重则越权写入。',
     terms: [
       {
         en: 'DTO',
         zh: '数据传输对象',
-        plain: '接口的入参和出参各一套模型，不直接用数据库模型。',
+        plain: '专门描述接口输入/输出的结构，与数据库模型分离。',
       },
       {
-        en: '批量赋值漏洞',
+        en: '校验',
+        zh: 'validation',
+        plain: '检查类型、范围、必填、格式。',
+      },
+      {
+        en: '白名单',
+        zh: 'allowlist',
+        plain: '只接收明确允许的字段。',
+      },
+      {
+        en: '过度提交',
         zh: 'mass assignment',
-        plain: '用户传什么字段，你就写什么字段。多传的字段也会生效。',
+        plain: '客户端提交了不该由它修改的字段。',
       },
     ],
     blocks: [
-      { type: 'h2', text: '一、直接透传会发生什么' },
-      {
-        type: 'code',
-        lang: 'python',
-        title: '✕ 用户传 {"title": "...", "price": 0, "is_admin": true}',
-        code: `
-@router.patch("/products/{id}")
-async def update(id: int, data: dict, session=Depends(get_db)):
-    for k, v in data.items():
-        setattr(product, k, v)      # 任何字段都能改
-`,
-      },
-      {
-        type: 'callout',
-        kind: 'danger',
-        text:
-          '这就是「批量赋值」漏洞：**任何字段都能改**，包括你没打算暴露的。\n' +
-          '价格改成 0、状态改成已支付、角色改成管理员 —— 全都能做到。',
-      },
-
-      { type: 'h2', text: '二、入参和出参要分开' },
-      {
-        type: 'code',
-        lang: 'python',
-        code: `
-class ProductUpdate(BaseModel):
-    title: str | None = None
-    price: Decimal | None = Field(None, gt=0, le=999999)
-
-
-class ProductOut(BaseModel):
-    id: int
-    title: str
-    price: Decimal
-    # cost_price 不在出参里 —— 成本价不能让前台看到
-`,
-      },
+      { type: 'h2', text: '一、先看一个提权' },
       {
         type: 'p',
-        text: '`ProductUpdate` 里没声明的字段，用户传了也会被忽略。这是「白名单」思维：默认拒绝，显式允许。',
-      },
-
-      { type: 'h2', text: '三、校验写在模型里' },
-      {
-        type: 'code',
-        lang: 'python',
-        code: `
-class OrderCreate(BaseModel):
-    sku_id: int
-    qty: int = Field(gt=0, le=999)
-
-    @field_validator("qty")
-    @classmethod
-    def check_qty(cls, v):
-        if v > 999:
-            raise ValueError("单次最多买 999 件")
-        return v
-`,
-      },
-      {
-        type: 'callout',
-        kind: 'success',
         text:
-          '校验前移的好处：**非法请求在进入业务逻辑之前就被挡住**，不会污染数据。\n' +
-          '而且错误信息是框架自动生成的，格式统一。',
+          '注册接口直接把请求体映射到用户模型。' +
+          '客户端多传一个 `role=admin`，新用户就成了管理员。',
       },
 
-      { type: 'h2', text: '四、出参要脱敏' },
+      { type: 'h2', text: '二、为什么要 DTO' },
       {
-        type: 'list',
-        items: [
-          '手机号：138****8888',
-          '成本价、利润率：不给前台',
-          '内部状态码：转成前端能懂的文案',
-          '密码、token：永远不出现在任何响应里',
+        type: 'table', head: ['层', '职责'],
+        rows: [
+          ['DTO', '接口契约、校验'],
+          ['领域模型', '业务规则'],
+          ['ORM 模型', '数据库映射'],
         ],
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '三、校验什么' },
       {
-        type: 'checklist',
-        items: [
-          { k: '接口参数不是 dict 或 Any', v: '看类型标注' },
-          { k: '入参模型只包含允许修改的字段', v: '读 schema' },
-          { k: '出参不含成本、密码等敏感字段', v: '看一次响应' },
-          { k: '多传一个字段既不报错也不生效', v: '手动试' },
+        type: 'list', items: [
+          '类型与格式',
+          '必填与长度',
+          '范围与枚举',
+          '跨字段约束',
+          '权限相关字段不可由客户端决定',
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
+
+      { type: 'h2', text: '四、输出也要 DTO' },
       {
-        type: 'list',
-        items: [
-          'DTO 和 ORM 模型之间怎么转换？手写还是自动？',
-          '为什么 price 要设上限？不设会怎样？',
-          '前端已经在校验了，后端为什么还要校验一遍？',
+        type: 'p',
+        text:
+          '不要把 ORM 对象直接返回，容易带出密码哈希、内部字段、其他用户数据。',
+      },
+
+      { type: 'h2', text: '五、常见失败' },
+      {
+        type: 'table', head: ['错误', '后果'],
+        rows: [
+          ['请求体直接进模型', '过度提交'],
+          ['只校验前端', '绕过'],
+          ['输出 ORM 对象', '字段泄露'],
+          ['校验规则分散', '不一致'],
+        ],
+      },
+
+      { type: 'h2', text: '六、验收' },
+      {
+        type: 'checklist', items: [
+          { k: '输入有 DTO 与校验', v: '看代码' },
+          { k: '敏感字段不可提交', v: '构造请求' },
+          { k: '输出有 DTO', v: '看响应' },
+          { k: '校验失败返回明确错误', v: '构造非法值' },
+          { k: '校验规则集中', v: '看定义' },
+        ],
+      },
+
+      { type: 'h2', text: '七、动手验证' },
+      {
+        type: 'list', items: [
+          '提交多余字段，确认被忽略/拒绝',
+          '提交错误类型，确认返回 422',
+          '查看响应是否含密码字段',
+        ],
+      },
+
+      { type: 'h2', text: '八、本课小结' },
+      {
+        type: 'callout', kind: 'info',
+        text: 'DTO 是接口的边界。外部输入必须经过白名单校验，不能直接进模型。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
+      {
+        type: 'list', items: [
+          'DTO 和 ORM 模型为什么要分开？',
+          '过度提交怎么防？',
+          '输出为什么也要 DTO？',
+          '校验应该在哪一层？',
+          '跨字段校验怎么做？',
         ],
       },
     ],
@@ -465,97 +479,116 @@ class OrderCreate(BaseModel):
     code: 'M2-05',
     title: '接口版本与兼容',
     chapter: 'API 与鉴权',
-    minutes: 35,
+    minutes: 50,
     lead:
-      '你改了接口，前端没升级。用户打开页面，白屏。\n' +
-      '这不是前端的问题 —— 是你破坏了契约。',
+      '接口一旦对外，就不能随便改。\n' +
+      '加字段通常安全，删字段、改类型、改语义，都会让老客户端崩。',
     terms: [
       {
         en: '向后兼容',
         zh: 'backward compatible',
-        plain: '老客户端用老字段，依然能正常工作。',
+        plain: '新版本不破坏老客户端。',
       },
       {
-        en: '灰度',
-        zh: 'canary',
-        plain: '新版本先给一小部分用户，出问题影响面小。',
+        en: '版本号',
+        zh: 'versioning',
+        plain: '用 URL/Header 标识接口版本。',
+      },
+      {
+        en: '弃用',
+        zh: 'deprecation',
+        plain: '标记旧接口将下线，给迁移窗口。',
+      },
+      {
+        en: '契约',
+        zh: 'contract',
+        plain: '接口的输入输出约定，变更要评估影响。',
       },
     ],
     blocks: [
-      { type: 'h2', text: '一、什么改动是安全的' },
+      { type: 'h2', text: '一、先看一次破坏' },
       {
-        type: 'table',
-        head: ['改动', '安全吗', '为什么'],
+        type: 'p',
+        text:
+          '把 `amount` 从数字改成字符串，前端计算全部出错。' +
+          '后端觉得「只是类型调整」，客户端直接崩。',
+      },
+
+      { type: 'h2', text: '二、哪些变更安全' },
+      {
+        type: 'table', head: ['变更', '兼容性'],
         rows: [
-          ['加一个可选字段', '安全', '老客户端直接忽略它'],
-          ['加一个必填字段', '不安全', '老客户端不会传'],
-          ['删字段', '不安全', '老客户端还在读'],
-          ['改字段类型', '不安全', 'int 变 string 会解析失败'],
-          ['改字段含义', '最危险', '类型没变，值的意思变了'],
+          ['新增可选字段', '通常安全'],
+          ['新增枚举值', '可能不安全'],
+          ['删除字段', '破坏'],
+          ['改类型/语义', '破坏'],
+          ['改默认值', '可能破坏'],
         ],
       },
+
+      { type: 'h2', text: '三、版本怎么管' },
       {
-        type: 'callout',
-        kind: 'danger',
+        type: 'list', items: [
+          'URL 版本：/v1/orders',
+          'Header 版本：Accept-Version',
+          '只对大变更升版本',
+          '旧版本给弃用期',
+        ],
+      },
+
+      { type: 'h2', text: '四、兼容策略' },
+      {
+        type: 'p',
         text:
-          '**改含义比改类型更危险** —— 因为类型检查、单元测试、编译器全都发现不了。\n' +
-          '比如 status 从 0/1 变成 1/2，代码照跑，业务全错。',
+          '加字段保持可选；删字段先停用再删；' +
+          '语义变化用新字段名，不要复用旧名。',
       },
 
-      { type: 'h2', text: '二、删字段的三步法' },
+      { type: 'h2', text: '五、常见失败' },
       {
-        type: 'steps',
-        items: [
-          { t: '先加新字段，双写', d: '新老字段同时写，读还是读老的。这时候谁都没影响。' },
-          { t: '切读', d: '确认所有客户端都升级完了，把读切到新字段。' },
-          { t: '观察一个版本，再删老字段', d: '删之前先全局搜一遍，还有谁在引用。' },
+        type: 'table', head: ['错误', '后果'],
+        rows: [
+          ['直接删字段', '老客户端崩'],
+          ['改字段含义', '数据错'],
+          ['无版本号', '无法并行'],
+          ['弃用无通知', '调用方措手不及'],
         ],
       },
 
-      { type: 'h2', text: '三、真要破坏兼容，就加版本号' },
+      { type: 'h2', text: '六、验收' },
       {
-        type: 'code',
-        lang: 'http',
-        code: `
-GET /api/v1/orders
-GET /api/v2/orders
-`,
-      },
-      {
-        type: 'callout',
-        kind: 'warn',
-        text:
-          '版本号是最后手段，不是常规手段。\n' +
-          '每多一个版本，你就多一份要维护、要修 bug、要测试的代码 —— 而且是永久的。',
-      },
-
-      { type: 'h2', text: '四、不同客户端的兼容窗口' },
-      {
-        type: 'list',
-        items: [
-          '移动 App：用户可能半年不更新，必须长期兼容老版本',
-          '小程序：有强制更新机制，窗口短很多',
-          '内部后台：可以约定同时发布，几乎没有窗口',
+        type: 'checklist', items: [
+          { k: '破坏性变更走新版本', v: '看路由' },
+          { k: '新增字段可选', v: '看契约' },
+          { k: '弃用有公告期', v: '看文档' },
+          { k: '契约测试覆盖', v: '看 CI' },
+          { k: '旧版本有监控', v: '看调用量' },
         ],
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '七、动手验证' },
       {
-        type: 'checklist',
-        items: [
-          { k: '新增字段都是可选的', v: '看 schema 变更' },
-          { k: '没有直接删字段或改类型', v: '看 diff' },
-          { k: '老版本客户端能正常调通', v: '用旧包测一次' },
-          { k: '字段含义变更写了迁移说明', v: '看变更记录' },
+        type: 'list', items: [
+          '用旧客户端调用新接口',
+          '删一个字段，观察客户端报错',
+          '加一个可选字段，确认兼容',
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
+
+      { type: 'h2', text: '八、本课小结' },
       {
-        type: 'list',
-        items: [
-          '如果必须改一个字段的含义，最稳妥的做法是什么？',
-          '接口版本号和发布日期，哪个更好用？',
-          '为什么说「契约测试」能提前发现兼容问题？',
+        type: 'callout', kind: 'info',
+        text: '接口兼容的原则：能加不改，要改就升版本，旧版本给迁移期。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
+      {
+        type: 'list', items: [
+          '为什么改类型是破坏性的？',
+          '新增枚举值为什么不安全？',
+          'URL 版本和 Header 版本怎么选？',
+          '弃用期多长合适？',
+          '如何发现还有谁在调旧接口？',
         ],
       },
     ],

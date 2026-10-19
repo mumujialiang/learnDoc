@@ -45,6 +45,20 @@ import s1 from './s1'
 import s2s3 from './s2s3'
 import s4s5 from './s4s5'
 import s6 from './s6'
+import b1 from './b1'
+import b2 from './b2'
+import b3 from './b3'
+import b4 from './b4'
+import b5 from './b5'
+import b6 from './b6'
+import c1 from './c1'
+import c2 from './c2'
+import c3 from './c3'
+import c4c5c6 from './c4c5c6'
+import d1 from './d1'
+import d2 from './d2'
+import d3 from './d3'
+import d4d5d6 from './d4d5d6'
 
 export const lessons = {
   ...m0,
@@ -94,4 +108,18 @@ export const lessons = {
   ...s2s3,
   ...s4s5,
   ...s6,
+  ...b1,
+  ...b2,
+  ...b3,
+  ...b4,
+  ...b5,
+  ...b6,
+  ...c1,
+  ...c2,
+  ...c3,
+  ...c4c5c6,
+  ...d1,
+  ...d2,
+  ...d3,
+  ...d4d5d6,
 }

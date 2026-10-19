@@ -3,7 +3,7 @@ export default {
     code: 'A2-01',
     title: '验收清单怎么定',
     chapter: '验收与 Review',
-    minutes: 45,
+    minutes: 50,
     lead:
       'AI 说「已完成」，不等于完成。\n' +
       '把「完成」写成可执行的条件，才不会靠感觉验收。',
@@ -23,19 +23,33 @@ export default {
         zh: 'regression',
         plain: '确认新改动没有破坏已有功能。',
       },
+      {
+        en: '证据',
+        zh: 'evidence',
+        plain: '请求、响应、日志、测试结果，而不是「我测过了」。',
+      },
     ],
     blocks: [
-      { type: 'h2', text: '一、好标准的三个特征' },
+      { type: 'h2', text: '一、先看一个真实场景' },
       {
-        type: 'list',
-        items: [
-          '可执行：能写成一个测试或一次操作',
-          '可观察：有明确的成功/失败信号',
-          '覆盖异常：不只测顺利路径',
+        type: 'p',
+        text:
+          'AI 说下单接口已完成。上线后发现重复提交产生两笔订单，' +
+          '因为它只测了成功路径。',
+      },
+
+      { type: 'h2', text: '二、好标准的三个特征' },
+      {
+        type: 'table',
+        head: ['特征', '说明'],
+        rows: [
+          ['可执行', '能写成一个测试或一次操作'],
+          ['可观察', '有明确的成功/失败信号'],
+          ['覆盖异常', '不只测顺利路径'],
         ],
       },
 
-      { type: 'h2', text: '二、按维度列' },
+      { type: 'h2', text: '三、按维度列' },
       {
         type: 'table',
         head: ['维度', '示例'],
@@ -48,7 +62,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '三、每个写接口都问' },
+      { type: 'h2', text: '四、每个写接口都问五句' },
       {
         type: 'list',
         items: [
@@ -60,14 +74,14 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '四、不要接受的验收方式' },
+      { type: 'h2', text: '五、不要接受的验收方式' },
       {
         type: 'callout',
         kind: 'warn',
         text: '「我测过了」「应该没问题」「逻辑上是对的」都不是验收。必须看到证据：请求、响应、日志、测试结果。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '六、验收' },
       {
         type: 'checklist',
         items: [
@@ -75,16 +89,37 @@ export default {
           { k: '异常路径有覆盖', v: '数一数共几条' },
           { k: '证据可留存', v: '日志/截图/测试报告' },
           { k: '验收失败能定位', v: '看错误信息' },
+          { k: '并发场景有覆盖', v: '压测或脚本' },
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '七、动手验证' },
+      {
+        type: 'list',
+        items: [
+          '给一个接口写 5 条验收标准',
+          '逐条执行并记录证据',
+          '故意让一条失败，确认能定位',
+          '把标准沉淀成回归用例',
+        ],
+      },
+
+      { type: 'h2', text: '八、本课小结' },
+      {
+        type: 'callout',
+        kind: 'info',
+        text: '验收清单的价值，是把「口头完成」变成「可复核的证据」。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
       {
         type: 'list',
         items: [
           '为什么「我测过了」不能作为验收？',
           '并发场景的验收怎么写？',
           '验收清单应该由谁定？',
+          '验收标准要写多细？',
+          '如何让验收自动化？',
         ],
       },
     ],
@@ -94,7 +129,7 @@ export default {
     code: 'A2-02',
     title: 'Review AI 代码的五个重点',
     chapter: '验收与 Review',
-    minutes: 50,
+    minutes: 55,
     lead:
       'AI 生成的代码通常「看起来很完整」，\n' +
       '问题往往在边界、并发和权限上，而不是语法。',
@@ -114,9 +149,22 @@ export default {
         zh: 'implicit assumption',
         plain: '代码没有写出来、但依赖成立的前提。',
       },
+      {
+        en: '影响面',
+        zh: 'blast radius',
+        plain: '一次改动可能影响到的调用方、数据与流程。',
+      },
     ],
     blocks: [
-      { type: 'h2', text: '一、五个重点' },
+      { type: 'h2', text: '一、先看一个真实场景' },
+      {
+        type: 'p',
+        text:
+          'AI 写的查询接口只按 id 查，没有校验归属。' +
+          '代码很干净，但任何人改一下 id 就能看别人的订单。',
+      },
+
+      { type: 'h2', text: '二、五个重点' },
       {
         type: 'table',
         head: ['重点', '看什么'],
@@ -129,7 +177,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '二、先看结构再看细节' },
+      { type: 'h2', text: '三、先看结构再看细节' },
       {
         type: 'p',
         text:
@@ -137,7 +185,7 @@ export default {
           '结构错了，逐行改代码没有意义。',
       },
 
-      { type: 'h2', text: '三、找隐含假设' },
+      { type: 'h2', text: '四、找隐含假设' },
       {
         type: 'list',
         items: [
@@ -148,7 +196,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '四、别只看 diff' },
+      { type: 'h2', text: '五、别只看 diff' },
       {
         type: 'p',
         text:
@@ -156,7 +204,14 @@ export default {
           '看改动的影响范围：谁调用它、依赖什么、有没有别的入口。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '六、常见失败' },
+      {
+        type: 'callout',
+        kind: 'warn',
+        text: '只 review 新增代码、不看调用方，是 AI 代码审查最常见的漏网方式。',
+      },
+
+      { type: 'h2', text: '七、验收' },
       {
         type: 'checklist',
         items: [
@@ -164,16 +219,37 @@ export default {
           { k: '隐含假设是否成立', v: '追问与验证' },
           { k: '调用方是否受影响', v: '搜引用' },
           { k: '有没有顺手改无关代码', v: '看 diff 范围' },
+          { k: '错误信息是否泄露内部细节', v: '触发异常' },
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '八、动手验证' },
+      {
+        type: 'list',
+        items: [
+          '拿一段 AI 代码，按五重点过一遍',
+          '构造越权请求',
+          '重复提交写接口',
+          '让下游失败，看异常路径',
+        ],
+      },
+
+      { type: 'h2', text: '九、本课小结' },
+      {
+        type: 'callout',
+        kind: 'info',
+        text: 'Review AI 代码，优先看「它会怎么坏」，而不是「它写得好不好看」。',
+      },
+
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
           '为什么 AI 代码的权限问题特别多？',
           '隐含假设怎么被发现？',
           'Review 应该先看什么？',
+          '如何判断影响面？',
+          '哪些问题必须打回重写？',
         ],
       },
     ],
@@ -183,7 +259,7 @@ export default {
     code: 'A2-03',
     title: '用测试约束 AI',
     chapter: '验收与 Review',
-    minutes: 45,
+    minutes: 50,
     lead:
       '让 AI 自己验证自己，等于没验证。\n' +
       '先写测试，再让它实现，是成本最低的约束方式。',
@@ -203,9 +279,22 @@ export default {
         zh: 'test double',
         plain: '用假的下游替代真实依赖，让测试稳定可控。',
       },
+      {
+        en: '断言',
+        zh: 'assertion',
+        plain: '测试里判断结果是否符合预期的语句。',
+      },
     ],
     blocks: [
-      { type: 'h2', text: '一、先写测试的好处' },
+      { type: 'h2', text: '一、先看一个真实场景' },
+      {
+        type: 'p',
+        text:
+          'AI 说测试全部通过。仔细一看，测试只断言了「没抛异常」，' +
+          '错误结果也能过。',
+      },
+
+      { type: 'h2', text: '二、先写测试的好处' },
       {
         type: 'list',
         items: [
@@ -216,7 +305,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '二、测什么' },
+      { type: 'h2', text: '三、测什么' },
       {
         type: 'table',
         head: ['层', '重点'],
@@ -227,18 +316,19 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '三、AI 常用错的测试' },
+      { type: 'h2', text: '四、AI 常用错的测试' },
       {
-        type: 'list',
-        items: [
-          '只测成功路径',
-          '断言写得太松，错误也能通过',
-          'mock 掉了真正要验证的逻辑',
-          '测试之间互相依赖，单独跑就失败',
+        type: 'table',
+        head: ['问题', '表现'],
+        rows: [
+          ['只测成功路径', '异常分支没覆盖'],
+          ['断言太松', '错误也能通过'],
+          ['mock 掉核心逻辑', '测了个寂寞'],
+          ['测试互相依赖', '单独跑就失败'],
         ],
       },
 
-      { type: 'h2', text: '四、让 AI 解释测试' },
+      { type: 'h2', text: '五、让 AI 解释测试' },
       {
         type: 'p',
         text:
@@ -246,7 +336,7 @@ export default {
           '说不清楚，说明测试没有价值。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '六、验收' },
       {
         type: 'checklist',
         items: [
@@ -254,16 +344,37 @@ export default {
           { k: '测试能否单独运行', v: '逐个跑' },
           { k: '断言是否具体', v: '看失败信息' },
           { k: 'CI 是否强制执行', v: '看流水线' },
+          { k: '关键路径是否覆盖', v: '看覆盖率' },
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '七、动手验证' },
+      {
+        type: 'list',
+        items: [
+          '给一个函数先写三条测试',
+          '让 AI 实现并通过',
+          '故意改坏实现，确认测试失败',
+          '把失败测试的提示整理成纠偏信息',
+        ],
+      },
+
+      { type: 'h2', text: '八、本课小结' },
+      {
+        type: 'callout',
+        kind: 'info',
+        text: '测试是给 AI 的「可执行规格」。断言越具体，AI 越不容易糊弄。',
+      },
+
+      { type: 'h2', text: '九、延伸问题' },
       {
         type: 'list',
         items: [
           '为什么「先写测试」能减少 AI 反复改错？',
           '哪些测试最容易写成形式主义？',
           '并发问题怎么用测试复现？',
+          '测试覆盖率越高越好吗？',
+          '如何防止 AI 改测试来通过？',
         ],
       },
     ],
@@ -273,7 +384,7 @@ export default {
     code: 'A2-04',
     title: '回归与冒烟',
     chapter: '验收与 Review',
-    minutes: 40,
+    minutes: 45,
     lead:
       'AI 修一个 bug，经常顺手弄坏另一个功能。\n' +
       '回归和冒烟，是上线前最后一道闸门。',
@@ -293,9 +404,22 @@ export default {
         zh: 'release checklist',
         plain: '上线前的固定动作清单，避免遗漏。',
       },
+      {
+        en: '回滚',
+        zh: 'rollback',
+        plain: '出问题时恢复到上一个可用版本。',
+      },
     ],
     blocks: [
-      { type: 'h2', text: '一、冒烟测什么' },
+      { type: 'h2', text: '一、先看一个真实场景' },
+      {
+        type: 'p',
+        text:
+          'AI 改了公共函数，只测了当前功能。' +
+          '上线后另一个调用方全挂，因为参数含义变了。',
+      },
+
+      { type: 'h2', text: '二、冒烟测什么' },
       {
         type: 'list',
         items: [
@@ -306,7 +430,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '二、回归的范围' },
+      { type: 'h2', text: '三、回归的范围' },
       {
         type: 'table',
         head: ['改动', '回归范围'],
@@ -318,7 +442,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '三、发布检查清单' },
+      { type: 'h2', text: '四、发布检查清单' },
       {
         type: 'list',
         items: [
@@ -330,14 +454,26 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '四、AI 参与的边界' },
+      { type: 'h2', text: '五、AI 参与的边界' },
       {
         type: 'callout',
         kind: 'info',
         text: '可以让 AI 生成冒烟脚本，但「跑没跑、结果如何」必须由你看真实输出，不能只看它的总结。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '六、常见失败' },
+      {
+        type: 'table',
+        head: ['错误', '后果'],
+        rows: [
+          ['只测改动点', '影响面漏掉'],
+          ['冒烟用例太全', '跑得慢，最后跳过'],
+          ['没有回滚方案', '事故延长'],
+          ['AI 说通过就信', '假阳性'],
+        ],
+      },
+
+      { type: 'h2', text: '七、验收' },
       {
         type: 'checklist',
         items: [
@@ -345,16 +481,37 @@ export default {
           { k: '发布前实际跑过', v: '看记录' },
           { k: '失败能定位到模块', v: '看日志' },
           { k: '回滚演练过', v: '记录耗时' },
+          { k: '影响面已评估', v: '搜调用方' },
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '八、动手验证' },
+      {
+        type: 'list',
+        items: [
+          '改一个公共函数，列出所有调用方',
+          '跑冒烟脚本',
+          '模拟一次回滚',
+          '记录从发现问题到恢复的时间',
+        ],
+      },
+
+      { type: 'h2', text: '九、本课小结' },
+      {
+        type: 'callout',
+        kind: 'info',
+        text: '上线前的底线：核心路径能跑、影响面查过、回滚能执行。',
+      },
+
+      { type: 'h2', text: '十、延伸问题' },
       {
         type: 'list',
         items: [
           '冒烟和回归的区别是什么？',
           '为什么公共函数改动要全量回归？',
           'AI 生成的测试结果为什么不能直接采信？',
+          '回滚演练多久做一次？',
+          '冒烟用例应该有多少条？',
         ],
       },
     ],

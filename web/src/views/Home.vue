@@ -18,7 +18,10 @@ const order = [
   'engineering',
   'erp',
   'ai',
+  'ai-basics',
   'ai-app',
+  'ai-media',
+  'dsh',
   'frontend',
 ]
 const learningPath = order.map((id) => courses.find((c) => c.id === id)).filter(Boolean)
