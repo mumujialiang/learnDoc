@@ -1,0 +1,70 @@
+services:
+  # 默认数据库。课程正文讲原理用它 —— MVCC、部分索引、ON CONFLICT 这些
+  # 概念在它上面最直白。
+  db:
+    image: postgres:16
+    container_name: mall-db
+    environment:
+      POSTGRES_USER: mall
+      POSTGRES_PASSWORD: mall
+      POSTGRES_DB: mall
+      TZ: Asia/Shanghai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mall -d mall"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    command:
+      - postgres
+      - -c
+      - log_min_duration_statement=200
+
+  # SQL Server 2022，默认不启动。需要时：
+  #   docker compose --profile mssql up -d
+  # 注意：至少占 2GB 内存，首次启动要 30 秒左右。
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mall-mssql
+    profiles: ["mssql"]
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Mall@Passw0rd"
+      MSSQL_PID: Developer
+      MSSQL_MEMORY_LIMIT_MB: "2048"
+      TZ: Asia/Shanghai
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssqldata:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'select 1' -b -o /dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: mall-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  mssqldata:
+  redisdata:

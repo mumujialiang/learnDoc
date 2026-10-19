@@ -1,0 +1,19 @@
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    port: 5173,
+    // true = 监听 0.0.0.0，局域网内其他设备（手机、同事电脑）用 IP 就能访问。
+    // 注意是纯 IPv4 监听，本机访问建议用 127.0.0.1 而不是 localhost，
+    // 因为 localhost 在 Windows 上可能先解析到 ::1（和后端课程里那个坑同源）。
+    host: true,
+    // 自动打开时直接用 IPv4 地址，避免 localhost 解析问题
+    open: 'http://127.0.0.1:5173',
+  },
+  preview: {
+    port: 4173,
+    host: true,
+  },
+})
