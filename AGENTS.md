@@ -149,7 +149,10 @@ $course | Where-Object { $_ -and $_ -notin $data }
 ## 发布
 
 - 远端：`origin` = `https://github.com/mumujialiang/learnDoc.git`。
-- push 到 `main` 会触发 `.github/workflows/deploy.yml`：构建 `web/` 并发布 Pages。
+- push 到 `main` 会触发 `.github/workflows/deploy.yml`：构建 `web/`，把 `dist`
+  强制推送到 `gh-pages` 分支，Pages 从该分支发布。
+- 如果 GitHub Actions 的 Pages 部署任务长时间排队，可在本地 `npm run build` 后
+  手动把 `web/dist` 推到 `gh-pages` 作为兜底。
 - 本机访问 GitHub 需要走系统代理（常见为 `http://127.0.0.1:10804`）。
   Git 不会自动读取 Windows 系统代理，推送时临时设置：
 
