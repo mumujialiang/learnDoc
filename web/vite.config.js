@@ -1,7 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-export default defineConfig({
+// 打包为 GitHub Pages 项目站点：
+//   https://mumujialiang.github.io/learnDoc/
+// 资源需要 /learnDoc/ 前缀；本地开发保持根路径，
+// 两者靠 command（dev / build）区分，互不干扰。
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '/learnDoc/' : '/',
   plugins: [vue()],
   server: {
     port: 5173,
@@ -16,4 +21,4 @@ export default defineConfig({
     port: 4173,
     host: true,
   },
-})
+}))

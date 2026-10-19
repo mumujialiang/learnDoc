@@ -2,6 +2,8 @@
 
 商城（MiniMall）+ ERP（MiniERP）全栈后端课程工作区。
 
+可视化讲义在线体验：<https://mumujialiang.github.io/learnDoc/>
+
 面向 5 年前端经验、转全栈的工程师。技术栈：
 
 - FastAPI + Pydantic v2
