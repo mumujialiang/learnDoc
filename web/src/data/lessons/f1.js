@@ -247,15 +247,14 @@ export default {
           'requestAnimationFrame 排在这之前，所以动画放 rAF 里最稳；requestIdleCallback 排在空闲时，适合低优先级计算。',
       },
 
-      { type: 'h2', text: '五、常见坑' },
+      { type: 'h2', text: '五、这些坑的共性' },
       {
-        type: 'list',
-        items: [
-          '长任务阻塞渲染，页面卡住',
-          '在微任务里无限递归，永远轮不到渲染',
-          'await 循环里没有让出，仍然占满主线程',
-          '误以为 setTimeout 能保证顺序',
-        ],
+        type: 'p',
+        text:
+          '坑的共同点是「让出」没做对：同步长任务不让出、微任务递归不让出、await 循环也不让出。' +
+          '第四类（误以为 setTimeout 保证顺序）则是顺序假设错了——' +
+          'setTimeout 只承诺「下一轮」，同一轮的微任务永远排在它前面。' +
+          '所以判断不是看代码里有没有 setTimeout，而是看「两帧之间主线程有没有空闲」。',
       },
       {
         type: 'callout',

@@ -63,7 +63,25 @@ export default {
         text: 'any 会让类型检查失效，而且会传染。需要「未知类型」时用 unknown，用之前必须收窄。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '五、类型边界要和数据流对齐' },
+      {
+        type: 'p',
+        text:
+          '表单输入、URL 参数、localStorage 和接口响应都属于外部数据。' +
+          '在这些入口用 unknown 接住，再转换成领域类型；内部函数一旦拿到可信类型，就不必在每一层重复判断。',
+      },
+      {
+        type: 'table',
+        head: ['位置', '推荐做法'],
+        rows: [
+          ['外部输入', 'unknown + 运行时校验'],
+          ['领域函数', '明确参数与返回类型'],
+          ['组件内部', '依赖推导，避免重复注解'],
+          ['遗留库', '局部封装 any，不让它扩散'],
+        ],
+      },
+
+      { type: 'h2', text: '六、验收' },
       {
         type: 'checklist',
         items: [
@@ -74,7 +92,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '七、课后问题' },
       {
         type: 'list',
         items: [
@@ -148,7 +166,24 @@ export default {
           '否则改类型时没人知道有没有破坏调用方。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '五、从请求函数看边界' },
+      {
+        type: 'p',
+        text:
+          '例如 `request<T>(url)` 可以让调用方得到 T，但它不能证明服务器真的返回 T。' +
+          '泛型只约束调用关系，数据进入系统的边界仍要配合 schema 校验；否则类型越漂亮，错误越晚暴露。',
+      },
+      {
+        type: 'table',
+        head: ['信号', '处理'],
+        rows: [
+          ['调用方都重复写同一约束', '提取一个有名字的泛型'],
+          ['类型错误信息难读', '拆成两三个中间类型'],
+          ['只为一次推导写复杂条件', '直接写明确接口'],
+        ],
+      },
+
+      { type: 'h2', text: '六、验收' },
       {
         type: 'checklist',
         items: [
@@ -159,7 +194,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '七、课后问题' },
       {
         type: 'list',
         items: [
@@ -237,7 +272,18 @@ export default {
           '类型里用可选字段表示，代码里显式处理，而不是假设一定存在。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '五、把校验放在边界' },
+      {
+        type: 'steps',
+        items: [
+          { t: '收到 JSON', d: '先当 unknown，不在请求层直接断言。' },
+          { t: '校验结构', d: '检查必填字段、枚举、数量范围。' },
+          { t: '转换领域类型', d: '把字符串日期、金额转换成统一表示。' },
+          { t: '进入组件', d: '组件只处理已经可信的类型。' },
+        ],
+      },
+
+      { type: 'h2', text: '六、验收' },
       {
         type: 'checklist',
         items: [
@@ -248,7 +294,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '七、课后问题' },
       {
         type: 'list',
         items: [
@@ -325,7 +371,17 @@ export default {
           '并确保构建产物和类型声明一起发布。',
       },
 
-      { type: 'h2', text: '五、验收' },
+      { type: 'h2', text: '五、排查「找不到类型」' },
+      {
+        type: 'steps',
+        items: [
+          { t: '先看导入路径', d: '确认运行时路径和类型路径指向同一个模块。' },
+          { t: '再看 package.json', d: '检查 exports、types、module 的优先级。' },
+          { t: '最后看工具链', d: '让 tsc、Vite、测试 runner 使用同一套别名。' },
+        ],
+      },
+
+      { type: 'h2', text: '六、验收' },
       {
         type: 'checklist',
         items: [
@@ -336,7 +392,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
+      { type: 'h2', text: '七、课后问题' },
       {
         type: 'list',
         items: [
