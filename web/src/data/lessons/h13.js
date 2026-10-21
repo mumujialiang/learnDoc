@@ -79,7 +79,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -183,7 +183,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -282,7 +282,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -382,7 +382,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -486,7 +486,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -586,7 +586,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -685,7 +685,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、小结与延伸' },
+      { type: 'h2', text: '六、小结' },
       {
         type: 'callout',
         kind: 'info',

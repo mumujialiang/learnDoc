@@ -131,7 +131,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、本课小结与延伸' },
+      { type: 'h2', text: '九、本课小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -285,7 +285,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、本课小结与延伸' },
+      { type: 'h2', text: '九、本课小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -444,7 +444,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、本课小结与延伸' },
+      { type: 'h2', text: '九、本课小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -593,7 +593,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结与延伸' },
+      { type: 'h2', text: '八、本课小结' },
       {
         type: 'callout',
         kind: 'info',
@@ -751,7 +751,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '八、本课小结与延伸' },
+      { type: 'h2', text: '八、本课小结' },
       {
         type: 'callout',
         kind: 'info',

@@ -11,7 +11,7 @@
 
 线上地址：<https://mumujialiang.github.io/learnDoc/>
 
-当前规模：**12 门课 / 73 个模块 / 338 节**，全部已上线。
+当前规模：**13 门课 / 77 个模块 / 354 节**，全部已上线。
 
 ## 目录结构
 
@@ -21,7 +21,7 @@ alembic/                数据库迁移
 scripts/smoke.py        健康检查、连接观察、并发压测脚本
 docs/                   原始讲义（course/）、架构决策（adr/）、SQL Server 对照
 web/                    课程站
-  src/data/lessons/     课程内容：m* / f* / a* / e* / h* / r* / s* / b* / c* / d*
+  src/data/lessons/     课程内容：m* / f* / a* / e* / h* / r* / s* / b* / c* / d* / g*
   src/data/course.js    模块与课时目录（chapters）
   src/data/courses.js   课程门户与模块映射（courses）
   src/components/       LessonRenderer 等通用组件
@@ -105,7 +105,7 @@ pip install -e ".[mssql]"
 
 ## 新增或修改课程内容
 
-1. 在对应数据文件里加课时对象（`m*.js` 数据库/后端，`f*` 前端，`a*` AI，`e*` ERP，`h*` 协议/工程）。
+1. 在对应数据文件里加课时对象（`m*.js` 数据库/后端，`f*` 前端，`a*` AI，`e*` ERP，`h*` 协议/工程，`g*` 日志与审计）。
 2. 新文件要在 `data/lessons/index.js` 里 `import` 并 `...spread`。
 3. 在 `data/course.js` 的 `chapterList` 中登记课时，**code 必须与数据 key 完全一致**。
 4. 在 `data/courses.js` 的对应课程 `chapterIds` 中加入模块 id。
@@ -133,7 +133,9 @@ $course | Where-Object { $_ -and $_ -notin $data }
 - 全中文，面向「5 年前端转全栈」的读者；先解释术语，再讲机制。
 - **默认不展示代码**。`CodeBlock` 默认折叠；只有终端命令和报错原文适合展开。
 - 每节结构尽量包含：真实场景 → 机制拆解 → 概念对照 → 失败模式 → 边界取舍 →
-  验收清单 → 动手验证 → 小结 → 延伸问题。
+  验收清单 → 动手验证 → 小结。
+- **不要写「课后问题」「延伸问题」板块**。有价值的问题要当场给出答案与判断依据，
+  写成陈述句并入正文或小结；把问题留给读者自己去找答案，等于内容没写完。
 - 密度基准：参考 `views/Lesson01.vue`（M0-01），正文约 2800 字、渲染高度约 7000px。
   新写或重写课时目标 1800–2500 字、9–11 个板块；不要用空话凑长度。
 - 讲「怎么判断」，不写「照着敲」的教程。

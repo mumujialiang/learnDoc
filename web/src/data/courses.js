@@ -92,6 +92,14 @@ export const courses = [
     chapterIds: ['F1', 'F2', 'F3', 'F4', 'F5', 'H15'],
   },
   {
+    id: 'logging',
+    name: '日志与审计课',
+    subtitle: '从一行日志到平台选型',
+    tagline: '诊断、追溯、证据、度量，四种用途决定日志放哪。什么时候写文件、什么时候建日志表、什么时候该上平台，按顺序判断。',
+    icon: '☰',
+    chapterIds: ['G1', 'G2', 'G3', 'G4'],
+  },
+  {
     id: 'engineering',
     name: '工程化与架构课',
     subtitle: '可观测、发布、架构与合规',

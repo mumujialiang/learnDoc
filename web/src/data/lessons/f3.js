@@ -146,16 +146,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么解构会丢失响应式？',
-          'Proxy 和 Object.defineProperty 的区别？',
-          'nextTick 解决什么问题？',
-          '为什么 P3 条件下未走到的字段修改不会触发更新？这会带来什么隐藏 bug？',
-        ],
-      },
     ],
   },
 
@@ -307,16 +297,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么子组件不应该修改 props？',
-          '受控组件在什么场景下更好？',
-          '什么时候该用插槽而不是 props？',
-          '半受控组件在异步回填场景下会出什么问题？',
-        ],
-      },
     ],
   },
 
@@ -472,16 +452,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么组合式 API 更容易产生副作用泄漏？',
-          'computed 和 watch 分别适合什么？',
-          '组件卸载后请求返回，应该怎么处理？',
-          'flush: post 和 nextTick 的关系是什么？',
-        ],
-      },
     ],
   },
 
@@ -625,16 +595,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么用索引当 key 会出问题？',
-          '虚拟 DOM 一定比直接操作 DOM 快吗？',
-          '首屏包体积和懒加载的关系？',
-          '父组件重渲染时，子组件在什么条件下可以跳过？',
-        ],
-      },
     ],
   },
 }

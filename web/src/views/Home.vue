@@ -16,6 +16,7 @@ const order = [
   'concurrency',
   'architecture',
   'engineering',
+  'logging',
   'erp',
   'ai',
   'ai-basics',
@@ -45,7 +46,7 @@ function courseDesc(c) {
       <div class="eyebrow">全栈工程课 · 可视化讲义</div>
       <h1>把全栈拆开讲，<br />每门课只说清一件事</h1>
       <p class="lead">
-        一套主线（商城 + ERP），拆成后端、数据库、并发、ERP、AI 编程与前端六门课。
+        一套主线（商城 + ERP），拆成后端、数据库、并发、日志与审计、架构、AI 与前端一整套课。
         不教语法 —— 教你怎么判断 AI 写的代码能不能上生产。
       </p>
 
@@ -90,7 +91,7 @@ function courseDesc(c) {
 
     <h2>建议的学习顺序</h2>
     <p>
-      六门课可以独立看，但按这个顺序走，前面的概念会在后面的课里反复用到。
+      这些课可以独立看，但按这个顺序走，前面的概念会在后面的课里反复用到。
     </p>
     <div class="path">
       <template v-for="(c, i) in learningPath" :key="c.id">

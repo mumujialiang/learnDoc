@@ -86,7 +86,6 @@ async def liveness():
     # 只证明进程还在，不碰数据库、不碰 Redis
     return {"status": "ok"}
 
-
 @router.get("/health")
 async def readiness(session = Depends(get_db)):
     db_ok = await ping_db(session)
@@ -441,13 +440,6 @@ const checklist = [
         </tbody>
       </table>
     </div>
-
-    <h2>十、课后问题</h2>
-    <ul>
-      <li>服务要部署 8 个副本，<code>pool_size</code> 该设多少？为什么？</li>
-      <li>为什么 <code>/health</code> 不去检查"数据库表建了没有"？</li>
-      <li>如果 Redis 只是用来做缓存，挂了要不要让 <code>/health</code> 返回 503？</li>
-    </ul>
 
     <PageNav :prev="{ path: '/', title: '课程首页' }" :next="{ path: '/m0-02', title: 'M0-02 事务边界' }" />
   </div>

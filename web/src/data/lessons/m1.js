@@ -123,15 +123,6 @@ total = (Decimal("99.90") * 3).quantize(
           { k: '金额字段带币种', v: '看表结构' },
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么不能「先存 float，展示时再格式化」？',
-          '如果支付通道只收整数分，系统内部该用什么？转换发生在哪一层？',
-          '汇率应该下单时锁定，还是支付时取实时？',
-        ],
-      },
     ],
   },
 
@@ -254,15 +245,6 @@ create table stock_in_item (
           { k: '每张表都有 created_by / created_at', v: '看表结构' },
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '主数据改名了，历史单据上显示新名字还是旧名字？',
-          '「作废」和「删除」的区别是什么？为什么需要前者？',
-          '如果台账漏记了一笔，怎么补救才不破坏审计？',
-        ],
-      },
     ],
   },
 
@@ -367,15 +349,6 @@ where id = :id and status = 'pending';
           { k: '非法跃迁会抛错，不是静默通过', v: '构造一次非法迁移' },
           { k: '每次状态变更都有日志记录', v: '改一次看表' },
           { k: '并发改状态只有一个成功', v: '并发测试' },
-        ],
-      },
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '订单「取消」之后还能「支付」吗？为什么不能？',
-          '状态机该放在 Python 里，还是数据库的 check 约束里？',
-          '如果业务要加一个新状态，你要改几处代码？',
         ],
       },
     ],
@@ -494,15 +467,6 @@ where id = :id and version = :old_version;
           { k: '并发改同一条记录，第二次会失败', v: '并发测试' },
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '软删除的数据要不要出现在列表里？搜索结果里呢？',
-          '如果审计要精确到「改了哪几个字段」，该怎么做？',
-          '乐观锁和悲观锁，分别适合什么场景？',
-        ],
-      },
     ],
   },
 
@@ -583,7 +547,6 @@ create unique index on product (tenant_id, code);
 # 中间件里从 token 解析出租户，塞进上下文
 request.state.tenant_id = token.tenant_id
 
-
 async def get_tenant(request) -> int:
     return request.state.tenant_id
 `,
@@ -604,15 +567,6 @@ async def get_tenant(request) -> int:
           { k: '所有唯一索引都包含 tenant_id', v: '看索引定义' },
           { k: 'tenant_id 来自登录态，不是请求参数', v: '搜参数定义' },
           { k: '用 A 的 token 查不到 B 的数据', v: '造两个租户试' },
-        ],
-      },
-      { type: 'h2', text: '五、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '如果两个租户要共享同一份商品数据，模型怎么改？',
-          '租户注销了，数据该怎么处理？直接删吗？',
-          '字段隔离方案下，怎么做跨租户的全局统计？',
         ],
       },
     ],

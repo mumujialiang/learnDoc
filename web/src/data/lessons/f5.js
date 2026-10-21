@@ -134,7 +134,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、小结与延伸' },
+      { type: 'h2', text: '九、小结' },
       {
         type: 'p',
         text:
@@ -278,7 +278,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、小结与延伸' },
+      { type: 'h2', text: '九、小结' },
       {
         type: 'p',
         text:
@@ -431,7 +431,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、小结与延伸' },
+      { type: 'h2', text: '九、小结' },
       {
         type: 'p',
         text:
@@ -583,7 +583,7 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '九、小结与延伸' },
+      { type: 'h2', text: '九、小结' },
       {
         type: 'p',
         text:

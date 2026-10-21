@@ -60,6 +60,10 @@ import d1 from './d1'
 import d2 from './d2'
 import d3 from './d3'
 import d4d5d6 from './d4d5d6'
+import g1 from './g1'
+import g2 from './g2'
+import g3 from './g3'
+import g4 from './g4'
 
 export const lessons = {
   ...m0,
@@ -124,4 +128,8 @@ export const lessons = {
   ...d2,
   ...d3,
   ...d4d5d6,
+  ...g1,
+  ...g2,
+  ...g3,
+  ...g4,
 }

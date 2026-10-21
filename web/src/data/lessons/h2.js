@@ -125,17 +125,6 @@ export default {
         text: 'JWT 解决的是「无状态校验」，不是「安全」。要撤销、要防盗，得额外设计。',
       },
 
-      { type: 'h2', text: '十、延伸问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么 JWT 载荷不能放敏感信息？',
-          '短过期 + refresh 解决了什么问题？',
-          'HttpOnly Cookie 为什么还需要防 CSRF？',
-          'refresh token 被盗怎么发现？',
-          '单点登录场景该选 session 还是 JWT？',
-        ],
-      },
     ],
   },
 
@@ -263,17 +252,6 @@ export default {
         text: 'OAuth2 是授权，OIDC 是认证。授权码换 token 必须发生在后端，secret 不能出现在客户端。',
       },
 
-      { type: 'h2', text: '十、延伸问题' },
-      {
-        type: 'list',
-        items: [
-          '授权码和 access token 有什么区别？',
-          '为什么 SPA 也要用 PKCE？',
-          'state 参数防的是什么攻击？',
-          'id token 能直接拿去调接口吗？',
-          'scope 申请多了会有什么后果？',
-        ],
-      },
     ],
   },
 
@@ -395,17 +373,6 @@ export default {
         text: 'SSO 的价值在账号生命周期管理。绑定键要稳定，离职同步要做，权限仍归本地。',
       },
 
-      { type: 'h2', text: '十、延伸问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么不能用邮箱做账号绑定键？',
-          'SSO 能替代权限系统吗？',
-          'IdP 登出后，本地会话应该怎么处理？',
-          'SAML 和 OIDC 的主要差别是什么？',
-          '多租户系统怎么做 SSO？',
-        ],
-      },
     ],
   },
 
@@ -536,17 +503,6 @@ export default {
         text: '认证的底线是慢哈希 + 不泄露账号存在性；授权的底线是默认拒绝 + 统一入口。',
       },
 
-      { type: 'h2', text: '十、延伸问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么 MD5 加盐也不够？',
-          'TOTP 和短信验证码的风险差异在哪？',
-          'RBAC 什么时候会不够用？',
-          '对象级权限为什么要统一入口？',
-          '权限变更需要审计吗？',
-        ],
-      },
     ],
   },
 }

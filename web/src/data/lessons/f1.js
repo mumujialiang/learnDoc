@@ -151,16 +151,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么 CSS 会阻塞渲染，JS 会阻塞解析？',
-          '重排和重绘的区别是什么？',
-          'defer 和 async 分别适合什么脚本？',
-          '为什么域名分片在 HTTP/2 下变成了负收益？',
-        ],
-      },
     ],
   },
 
@@ -316,16 +306,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么 Promise 比 setTimeout 先执行？',
-          'requestAnimationFrame 和 setTimeout 的区别？',
-          '长任务为什么会影响交互？',
-          '为什么 Web Worker 解决的是「不阻塞」，而不是「更快」？',
-        ],
-      },
     ],
   },
 
@@ -492,16 +472,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十二、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么 HTML 不适合长强缓存？',
-          'ETag 和 Last-Modified 哪个更精确？',
-          'Service Worker 更新为什么会滞后？',
-          'CDN 的 TTL 与源站 Cache-Control 冲突时以谁为准？',
-        ],
-      },
     ],
   },
 
@@ -661,16 +631,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '十一、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么 localStorage 不适合存 token？',
-          '同源策略能阻止请求发出吗？',
-          'SameSite 能防住哪些 CSRF？',
-          '把 token 移进 HttpOnly cookie 后，新增了什么风险？',
-        ],
-      },
     ],
   },
 }

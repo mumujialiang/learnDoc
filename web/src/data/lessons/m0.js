@@ -155,15 +155,6 @@ where id = :id and status = 'pending';
           { k: '把状态重复设置成同一个值不报错', v: '连着调两次' },
         ],
       },
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          'request_id 该由前端生成还是后端生成？各自的坑是什么？',
-          '如果客户端根本不传幂等键，服务端能自己造一个吗？怎么造？',
-          '「扣库存」这类操作，光靠幂等键能解决吗？还缺什么前提？',
-        ],
-      },
     ],
   },
 
@@ -282,7 +273,6 @@ async def handle_business(request, exc: BusinessError):
         content={"code": exc.code, "message": exc.message, "data": exc.data},
     )
 
-
 @app.exception_handler(Exception)
 async def handle_unexpected(request, exc: Exception):
     logger.exception("unhandled", extra={"trace_id": request.state.trace_id})
@@ -302,15 +292,6 @@ async def handle_unexpected(request, exc: Exception):
           { k: '异常日志里有完整堆栈', v: '看日志文件' },
           { k: '503 和 500 分得清', v: '停掉 Redis 再请求' },
           { k: '错误响应里没有泄露 SQL 或堆栈', v: '直接读响应体' },
-        ],
-      },
-      { type: 'h2', text: '五、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么「库存不足」用 409 而不是 400？',
-          '「系统繁忙」要不要告诉用户具体原因？什么情况下必须说？',
-          '如果一个接口可能返回 30 种业务错误，前端怎么维护这些分支？',
         ],
       },
     ],

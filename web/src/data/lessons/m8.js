@@ -98,15 +98,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么「内网调用」不能默认可信？',
-          '一条数据在系统里流转，什么时候它从「不可信」变成「可信」？',
-          '如果所有校验都只做在前端，最坏的结果是什么？',
-        ],
-      },
     ],
   },
 
@@ -208,15 +199,6 @@ export default {
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么「前端隐藏按钮」不能算权限控制？',
-          '对象级权限和角色权限，哪个更容易漏？为什么？',
-          '如果请求参数里同时有 user_id 和 token，应该信哪个？',
-        ],
-      },
     ],
   },
 
@@ -319,15 +301,6 @@ sql = "select * from orders order by " + sort_map[sort_field]`,
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '用了 ORM 就一定没有注入吗？',
-          '为什么 `order by` 不能参数化？',
-          '数据库账号为什么不该用 sa / root？',
-        ],
-      },
     ],
   },
 
@@ -431,15 +404,6 @@ sql = "select * from orders order by " + sort_map[sort_field]`,
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么「只校验 URL 字符串」挡不住 SSRF？',
-          '支付回调为什么不能信任请求里的金额？',
-          '开放重定向本身危害不大，为什么常和钓鱼一起出现？',
-        ],
-      },
     ],
   },
 
@@ -536,15 +500,6 @@ sql = "select * from orders order by " + sort_map[sort_field]`,
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么「扩展名白名单」仍然不够？',
-          '上传的文件为什么不建议和 API 同域？',
-          '图片处理为什么必须异步？',
-        ],
-      },
     ],
   },
 
@@ -643,15 +598,6 @@ sql = "select * from orders order by " + sort_map[sort_field]`,
         ],
       },
 
-      { type: 'h2', text: '六、课后问题' },
-      {
-        type: 'list',
-        items: [
-          '为什么「把密钥写到环境变量」比写在代码里好，但仍然不够？',
-          'JWT 过期时间设 7 天有什么问题？',
-          '密钥泄露后，为什么第一步是轮换而不是排查？',
-        ],
-      },
     ],
   },
 }
